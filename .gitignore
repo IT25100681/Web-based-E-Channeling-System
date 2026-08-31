@@ -1,0 +1,29 @@
+# Target & Build directory
+target/
+*.jar
+*.war
+*.ear
+*.rar
+
+# IDE & OS settings
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.ds_store
+Thumbs.db
+
+# Sensitive local configurations / credentials
+src/main/resources/application-local.yml
+src/main/resources/application-dev-secrets.yml
+
+# Storage / User Uploads
+src/main/resources/static/uploads/*
+!src/main/resources/static/uploads/.gitkeep
+uploads/
+
+# Log files
+*.log
+logs/
