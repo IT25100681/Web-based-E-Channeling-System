@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Add Clinical Record</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-file-circle-plus me-2"></i>Add Clinical Record</h3>
+                <form th:action="@{/medical-history/records}" th:object="${recordForm}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" th:field="*{patientId}">
+                    <input type="hidden" th:field="*{doctorId}">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Blood Group</label>
+                            <input type="text" th:field="*{bloodGroup}" class="form-control" placeholder="e.g. O+">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Chronic Conditions</label>
+                            <input type="text" th:field="*{chronicConditions}" class="form-control" placeholder="e.g. Diabetes Type II">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Diagnosis *</label>
+                        <input type="text" th:field="*{diagnosis}" class="form-control" required placeholder="Primary Diagnosis">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Treatment Notes & Observations</label>
+                        <textarea th:field="*{treatmentNotes}" class="form-control" rows="3" placeholder="Enter treatment plan, notes, or observations..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Attach Lab Report / Medical Document</label>
+                        <input type="file" name="file" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"><i class="fa-solid fa-save me-1"></i> Save Clinical Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
