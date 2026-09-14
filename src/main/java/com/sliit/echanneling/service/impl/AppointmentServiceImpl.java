@@ -46,7 +46,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         String refNo = "APP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String date = request.getAppointmentDate() != null ? request.getAppointmentDate() : schedule.getScheduleDate();
-        String time = request.getAppointmentTime() != null ? request.getAppointmentTime() : schedule.getStartTime();
+        String requestedTime = request.getAppointmentTime() != null ? request.getAppointmentTime() : schedule.getStartTime();
+        String time = calculateAvailableSlotTime(schedule.getDoctor().getStaffId(), schedule, date, requestedTime);
         String nowStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         Appointment appointment = Appointment.builder()
@@ -67,11 +68,43 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    private String calculateAvailableSlotTime(Long doctorId, DoctorSchedule schedule, String date, String requestedTime) {
+        String candidateTime = requestedTime;
+        if (!appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, candidateTime)) {
+            return candidateTime;
+        }
+
+        try {
+            java.time.LocalTime current = java.time.LocalTime.parse(candidateTime);
+            java.time.LocalTime endTime = schedule.getEndTime() != null ? java.time.LocalTime.parse(schedule.getEndTime()) : current.plusHours(3);
+
+            while (!current.isAfter(endTime)) {
+                current = current.plusMinutes(15);
+                String formattedTime = current.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+                if (!appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, formattedTime)) {
+                    return formattedTime;
+                }
+            }
+        } catch (Exception e) {
+            // If parsing fails, generate slot with offset
+        }
+
+        throw new IllegalStateException("That doctor slot is already booked! Please select another schedule.");
+    }
+
     @Override
     @Transactional(readOnly = true)
     public AppointmentViewDTO getAppointmentByRef(String referenceNo) {
         Appointment appointment = appointmentRepository.findByReferenceNo(referenceNo)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + referenceNo));
+        return mapToViewDTO(appointment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AppointmentViewDTO getAppointmentById(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
         return mapToViewDTO(appointment);
     }
 

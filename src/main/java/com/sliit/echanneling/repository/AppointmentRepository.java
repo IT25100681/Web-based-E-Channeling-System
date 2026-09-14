@@ -18,4 +18,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.schedule.scheduleId = :scheduleId AND a.status IN ('PENDING', 'CONFIRMED')")
     long countActiveBookingsBySchedule(@Param("scheduleId") Long scheduleId);
+
+    boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(Long doctorId, String appointmentDate, String appointmentTime);
 }

@@ -9,6 +9,7 @@ import java.util.List;
 public interface AppointmentService {
     Appointment bookAppointment(BookingRequestDTO request);
     AppointmentViewDTO getAppointmentByRef(String referenceNo);
+    AppointmentViewDTO getAppointmentById(Long appointmentId);
     List<AppointmentViewDTO> getAppointmentsByPatient(Long patientId);
     List<AppointmentViewDTO> getAppointmentsByDoctor(Long doctorId);
     void cancelAppointment(Long appointmentId, String username);

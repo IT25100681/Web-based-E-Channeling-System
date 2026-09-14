@@ -20,13 +20,7 @@ public class PaymentController {
 
     @GetMapping("/checkout/{appointmentId}")
     public String checkout(@PathVariable("appointmentId") Long appointmentId, Model model) {
-        AppointmentViewDTO app = appointmentService.getAppointmentByRef(
-                appointmentService.getAppointmentsByPatient(1L).stream()
-                        .filter(a -> a.getAppointmentId().equals(appointmentId))
-                        .findFirst()
-                        .map(AppointmentViewDTO::getReferenceNo)
-                        .orElseThrow(() -> new IllegalArgumentException("Appointment not found"))
-        );
+        AppointmentViewDTO app = appointmentService.getAppointmentById(appointmentId);
 
         PaymentRequestDTO paymentRequest = new PaymentRequestDTO();
         paymentRequest.setAppointmentId(app.getAppointmentId());
