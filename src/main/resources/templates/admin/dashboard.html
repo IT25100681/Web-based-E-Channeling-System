@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-chart-line text-primary me-2"></i>Administrator Dashboard</h2>
+        <a href="/admin/hospitals" class="btn btn-outline-primary"><i class="fa-solid fa-building me-1"></i> Manage Hospitals</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white p-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">TOTAL APPOINTMENTS</h6>
+                        <h2 class="fw-bold mb-0" th:text="${totalAppointments}">0</h2>
+                    </div>
+                    <i class="fa-solid fa-calendar-check fa-3x text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white p-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">REGISTERED PATIENTS</h6>
+                        <h2 class="fw-bold mb-0" th:text="${totalPatients}">0</h2>
+                    </div>
+                    <i class="fa-solid fa-users fa-3x text-white-50"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white p-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50">ACTIVE DOCTORS</h6>
+                        <h2 class="fw-bold mb-0" th:text="${totalDoctors}">0</h2>
+                    </div>
+                    <i class="fa-solid fa-user-doctor fa-3x text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <h4 class="mb-3"><i class="fa-solid fa-sack-dollar text-success me-2"></i>Revenue & Appointment Summary by Doctor</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Doctor Name</th>
+                    <th>Department</th>
+                    <th>Total Appointments</th>
+                    <th>Total Generated Revenue (LKR)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${revenueReports}">
+                    <td th:text="${r.doctorName}" class="fw-bold">Doctor</td>
+                    <td th:text="${r.departmentName}">Dept</td>
+                    <td th:text="${r.totalAppointments}">0</td>
+                    <td th:text="${r.totalRevenue}" class="fw-bold text-success">LKR 0.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
