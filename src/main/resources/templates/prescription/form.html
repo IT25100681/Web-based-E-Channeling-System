@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Issue Digital Prescription</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-file-prescription me-2"></i>Issue Digital Prescription</h3>
+                <form th:action="@{/prescriptions}" th:object="${prescriptionForm}" method="post">
+                    <input type="hidden" th:field="*{appointmentId}">
+                    <input type="hidden" th:field="*{patientId}">
+                    <input type="hidden" th:field="*{doctorId}">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Prescription & Consultation Notes</label>
+                        <textarea th:field="*{notes}" class="form-control" rows="2" placeholder="e.g. Patient presented with fever and cough..."></textarea>
+                    </div>
+
+                    <h5 class="fw-bold mt-4 mb-2">Prescribed Medications</h5>
+                    <div id="itemContainer">
+                        <div class="border p-3 rounded mb-3 bg-light" th:each="item, stat : *{items}">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small">Medication *</label>
+                                    <select th:field="*{items[__${stat.index}__].medicationId}" class="form-select" required>
+                                        <option th:each="m : ${medications}" th:value="${m.medicationId}" th:text="${m.name} + ' (' + ${m.brand} + ' - ' + ${m.unit} + ')'">Med</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Dosage *</label>
+                                    <input type="text" th:field="*{items[__${stat.index}__].dosage}" class="form-control" placeholder="e.g. 1 Tablet" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Frequency *</label>
+                                    <input type="text" th:field="*{items[__${stat.index}__].frequency}" class="form-control" placeholder="e.g. Twice Daily after meal" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small">Days *</label>
+                                    <input type="number" th:field="*{items[__${stat.index}__].durationDays}" class="form-control" required min="1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mt-3"><i class="fa-solid fa-check me-1"></i> Save & Issue Prescription</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
