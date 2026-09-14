@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Submit Complaint</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-comment-dots me-2"></i>Submit Patient Complaint</h3>
+                <p class="text-muted">We value your feedback. Submit your concerns and our administrative team will resolve it promptly.</p>
+                <form th:action="@{/complaints}" th:object="${complaintForm}" method="post">
+                    <input type="hidden" th:field="*{patientId}">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Complaint Category *</label>
+                        <select th:field="*{categoryId}" class="form-select" required>
+                            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}">Category</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Subject / Title *</label>
+                        <input type="text" th:field="*{title}" class="form-control" required placeholder="Brief summary of your complaint">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label font-weight-bold">Detailed Description *</label>
+                        <textarea th:field="*{description}" class="form-control" rows="4" required placeholder="Describe the incident, appointment details, or issues experienced..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"><i class="fa-solid fa-paper-plane me-1"></i> Submit Complaint Ticket</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
