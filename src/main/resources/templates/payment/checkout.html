@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Payment Gateway</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-4 shadow">
+                <div class="text-center mb-3">
+                    <i class="fa-solid fa-credit-card fa-3x text-primary mb-2"></i>
+                    <h4 class="fw-bold">Secure Payment Checkout</h4>
+                    <p class="text-muted small">Mock Payment Gateway for Channeling</p>
+                </div>
+                <div class="bg-light p-3 rounded mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>Reference:</span>
+                        <strong th:text="${appointment.referenceNo}">APP-123</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Doctor:</span>
+                        <strong th:text="${appointment.doctorName}">Dr. Name</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                        <span class="fs-5">Amount Due:</span>
+                        <strong class="fs-5 text-success" th:text="'LKR ' + ${appointment.fee}">LKR 2000</strong>
+                    </div>
+                </div>
+
+                <form th:action="@{/patient/payments/process}" th:object="${paymentRequest}" method="post">
+                    <input type="hidden" th:field="*{appointmentId}">
+                    <input type="hidden" th:field="*{amount}">
+                    <input type="hidden" th:field="*{paymentMethod}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Cardholder Name</label>
+                        <input type="text" class="form-control" placeholder="Name on Card" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Card Number</label>
+                        <input type="text" th:field="*{cardNumber}" class="form-control" placeholder="4532 XXXX XXXX 8900" required>
+                        <small class="text-muted">Use any test card number. Card ending in '0000' will simulate failure.</small>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="text" th:field="*{cardExpiry}" class="form-control" placeholder="MM/YY" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">CVV</label>
+                            <input type="password" th:field="*{cvv}" class="form-control" placeholder="123" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold"><i class="fa-solid fa-lock me-1"></i> Pay Now & Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
