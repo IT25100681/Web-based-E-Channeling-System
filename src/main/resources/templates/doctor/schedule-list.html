@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Doctor Schedules</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-clock text-primary me-2"></i>My Channeling Schedules</h2>
+        <a href="/doctor/schedules/new" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Create Session</a>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Time Slot</th>
+                    <th>Department</th>
+                    <th>Max Patients</th>
+                    <th>Booked Count</th>
+                    <th>Fee (LKR)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${schedules}">
+                    <td class="fw-bold" th:text="${s.scheduleDate}">2026-10-01</td>
+                    <td th:text="${s.startTime} + ' - ' + ${s.endTime}">09:00 - 12:00</td>
+                    <td th:text="${s.departmentName}">Dept</td>
+                    <td th:text="${s.maxPatients}">15</td>
+                    <td th:text="${s.bookedCount}">0</td>
+                    <td th:text="${s.consultationFee}">2000</td>
+                    <td><span class="badge bg-success" th:text="${s.status}">ACTIVE</span></td>
+                    <td>
+                        <form th:action="@{/doctor/schedules/{id}/status(id=${s.scheduleId})}" method="post">
+                            <input type="hidden" name="status" th:value="${s.status == 'ACTIVE' ? 'CANCELLED' : 'ACTIVE'}">
+                            <button type="submit" class="btn btn-sm" th:classappend="${s.status == 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                    th:text="${s.status == 'ACTIVE' ? 'Deactivate' : 'Activate'}">Toggle</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(schedules)}">
+                    <td colspan="8" class="text-center text-muted py-4">No schedules published yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
