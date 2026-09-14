@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Home — LankaCare E-Channeling</title>
+    <style>
+        .hero-banner {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            padding: 60px 0;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        .feature-box {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner shadow p-5 text-center text-md-start">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="display-4 fw-bold mb-3">Book Specialist Doctors Online</h1>
+                <p class="lead mb-4">LankaCare Medical Services digitizes your healthcare journey. Search for specialist doctors, check real-time session availability, book appointments, and receive instant digital receipts.</p>
+                <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+                    <a href="/patient/appointments/search" class="btn btn-light btn-lg fw-bold text-primary px-4"><i class="fa-solid fa-magnifying-glass me-2"></i> Find a Doctor</a>
+                    <a href="/register" class="btn btn-outline-light btn-lg fw-bold px-4"><i class="fa-solid fa-user-plus me-2"></i> Register Account</a>
+                </div>
+            </div>
+            <div class="col-md-5 text-center mt-4 mt-md-0">
+                <i class="fa-solid fa-hospital-user text-white opacity-75" style="font-size: 10rem;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Search Card -->
+    <div class="card p-4 shadow-sm mb-5">
+        <h4 class="fw-bold text-primary mb-3"><i class="fa-solid fa-search me-2"></i>Quick Channeling Search</h4>
+        <form th:action="@{/patient/appointments/search}" method="get" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label font-weight-bold">Specialization</label>
+                <select name="specialization" class="form-select">
+                    <option value="">-- Select Medical Specialization --</option>
+                    <option th:each="spec : ${specializations}" th:value="${spec.name}" th:text="${spec.name}">Specialization</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label font-weight-bold">Date</label>
+                <input type="date" name="date" class="form-control">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-search me-1"></i> Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Medical Services Showcase -->
+    <h3 class="fw-bold text-dark mb-4 text-center">Comprehensive E-Health Services</h3>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 p-4 shadow-sm border-0 feature-box text-center">
+                <i class="fa-solid fa-calendar-check text-primary fa-3x mb-3"></i>
+                <h5 class="fw-bold">Doctor Channeling</h5>
+                <p class="text-muted">Real-time doctor schedule booking with automated double-booking prevention.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 shadow-sm border-0 feature-box text-center">
+                <i class="fa-solid fa-prescription-bottle-medical text-success fa-3x mb-3"></i>
+                <h5 class="fw-bold">Digital Prescriptions</h5>
+                <p class="text-muted">Receive digital doctor prescriptions online, view dosage instructions, and print Rx copies.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 shadow-sm border-0 feature-box text-center">
+                <i class="fa-solid fa-notes-medical text-info fa-3x mb-3"></i>
+                <h5 class="fw-bold">Medical History & Records</h5>
+                <p class="text-muted">Secure storage of clinical notes, lab report document attachments, and allergy tracking.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

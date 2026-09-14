@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://localhost:1433;databaseName=echanneling_db;encrypt=true;trustServerCertificate=true;}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.SQLServerDialect
+
+  flyway:
+    clean-disabled: false
+
+logging:
+  level:
+    root: INFO
+    com.sliit.echanneling: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.flywaydb: INFO

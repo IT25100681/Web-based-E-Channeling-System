@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>404 Page Not Found</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="text-center py-5">
+        <i class="fa-solid fa-compass text-warning opacity-75 mb-3" style="font-size: 6rem;"></i>
+        <h1 class="display-4 fw-bold text-warning">404 — Page Not Found</h1>
+        <p class="lead text-muted">The requested page or appointment resource could not be found.</p>
+        <a href="/" class="btn btn-primary mt-3"><i class="fa-solid fa-house me-1"></i> Back to Home Page</a>
+    </div>
+</div>
+</body>
+</html>
