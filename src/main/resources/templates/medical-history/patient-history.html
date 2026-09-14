@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Patient Medical History</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fa-solid fa-notes-medical text-primary me-2"></i>Medical History Profile</h2>
+            <p class="text-muted mb-0" th:text="'Patient: ' + ${history.patientName}">Patient Name</p>
+        </div>
+        <a th:href="@{/medical-history/records/new(patientId=${history.patientId})}" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Add Clinical Record</a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold text-danger"><i class="fa-solid fa-droplet me-2"></i>General Medical Details</h5>
+                <p class="mb-1"><strong>Blood Group:</strong> <span class="badge bg-danger" th:text="${history.bloodGroup != null ? history.bloodGroup : 'Not Specified'}">A+</span></p>
+                <p class="mb-0"><strong>Chronic Conditions:</strong> <span th:text="${history.chronicConditions != null ? history.chronicConditions : 'None reported'}">Conditions</span></p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5 class="fw-bold text-warning"><i class="fa-solid fa-triangle-exclamation me-2"></i>Known Allergies</h5>
+                <ul class="list-group list-group-flush">
+                    <li th:each="a : ${history.allergies}" class="list-group-item d-flex justify-content-between align-items-center">
+                        <span th:text="${a.allergen}" class="fw-bold">Allergen</span>
+                        <span class="badge bg-warning text-dark" th:text="${a.severity}">High</span>
+                    </li>
+                    <li th:if="${#lists.isEmpty(history.allergies)}" class="list-group-item text-muted">No known allergies registered.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-file-medical text-primary me-2"></i>Consultation & Clinical Records</h4>
+    <div class="row">
+        <div th:each="r : ${history.records}" class="col-12 mb-3">
+            <div class="card p-4 shadow-sm border-start border-4 border-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-dark" th:text="${r.diagnosis}">Diagnosis</h5>
+                    <small class="text-muted" th:text="'Date: ' + ${r.recordDate} + ' | Doctor: ' + ${r.doctorName}">Date</small>
+                </div>
+                <p class="text-muted mb-3" th:text="${r.treatmentNotes}">Treatment Notes</p>
+                <div th:if="${not #lists.isEmpty(r.attachments)}">
+                    <h6 class="fw-bold text-primary"><i class="fa-solid fa-paperclip me-1"></i> Attached Documents / Reports:</h6>
+                    <div class="d-flex gap-2">
+                        <a th:each="att : ${r.attachments}" th:href="${att.filePath}" target="_blank" class="btn btn-sm btn-outline-info">
+                            <i class="fa-solid fa-file-pdf me-1"></i> <span th:text="${att.fileName}">File</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(history.records)}" class="col-12 text-center py-4 text-muted">
+            No clinical records logged for this patient history.
+        </div>
+    </div>
+</div>
+</body>
+</html>
