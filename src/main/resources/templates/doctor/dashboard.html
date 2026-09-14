@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Doctor Portal</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Doctor Portal — <span th:text="${doctor.name}" class="text-primary">Doctor</span></h2>
+            <p class="text-muted mb-0" th:text="${doctor.specialization} + ' &bull; ' + ${doctor.qualification}">Spec</p>
+        </div>
+        <a href="/doctor/schedules/new" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Add New Channeling Session</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card p-4 shadow-sm mb-4">
+                <h4><i class="fa-solid fa-calendar-check text-primary me-2"></i>Patient Appointments</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Ref</th>
+                            <th>Patient Name</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="a : ${appointments}">
+                            <td th:text="${a.referenceNo}">Ref</td>
+                            <td th:text="${a.patientName}">Patient</td>
+                            <td th:text="${a.appointmentDate} + ' ' + ${a.appointmentTime}">Time</td>
+                            <td><span class="badge bg-success" th:text="${a.status}">STATUS</span></td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a th:href="@{/prescriptions/new(appointmentId=${a.appointmentId},patientId=${a.patientId})}" class="btn btn-outline-success">Issue Rx</a>
+                                    <a th:href="@{/medical-history/patient/{id}(id=${a.patientId})}" class="btn btn-outline-info">History</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(appointments)}">
+                            <td colspan="5" class="text-center text-muted py-3">No patient appointments scheduled yet.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card p-4 shadow-sm">
+                <h4><i class="fa-solid fa-clock text-info me-2"></i>My Channeling Sessions</h4>
+                <ul class="list-group list-group-flush">
+                    <li th:each="s : ${schedules}" class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <strong th:text="${s.scheduleDate}">Date</strong>
+                            <span class="badge bg-secondary" th:text="${s.startTime} + ' - ' + ${s.endTime}">Time</span>
+                        </div>
+                        <small class="text-muted" th:text="'Bookings: ' + ${s.bookedCount} + '/' + ${s.maxPatients}"></small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
