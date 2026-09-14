@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Manage Hospitals & Departments</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4"><i class="fa-solid fa-hospital text-primary me-2"></i>Hospitals, Departments & Specializations</h2>
+
+    <div class="row">
+        <!-- Add Hospital -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm mb-4">
+                <h5 class="card-title text-primary"><i class="fa-solid fa-plus me-1"></i> Add Hospital Branch</h5>
+                <form th:action="@{/admin/hospitals}" th:object="${newHospital}" method="post">
+                    <div class="mb-2">
+                        <label class="form-label">Hospital Name</label>
+                        <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. LankaCare Kandy">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="text" th:field="*{contactNo}" class="form-control" placeholder="+94 81 234 5678">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-sm mt-2">Save Hospital</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Department -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm mb-4">
+                <h5 class="card-title text-success"><i class="fa-solid fa-plus me-1"></i> Add Department</h5>
+                <form th:action="@{/admin/departments}" th:object="${newDepartment}" method="post">
+                    <div class="mb-2">
+                        <label class="form-label">Hospital Branch</label>
+                        <select name="hospitalId" class="form-select" required>
+                            <option th:each="h : ${hospitals}" th:value="${h.hospitalId}" th:text="${h.name}">Hospital</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Department Name</label>
+                        <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. Neurology">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 btn-sm mt-2">Save Department</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Specialization -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm mb-4">
+                <h5 class="card-title text-info"><i class="fa-solid fa-plus me-1"></i> Add Specialization</h5>
+                <form th:action="@{/admin/specializations}" th:object="${newSpecialization}" method="post">
+                    <div class="mb-2">
+                        <label class="form-label">Specialization Name</label>
+                        <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. ENT Specialist">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Description</label>
+                        <input type="text" th:field="*{description}" class="form-control" placeholder="Short summary">
+                    </div>
+                    <button type="submit" class="btn btn-info text-white w-100 btn-sm mt-2">Save Specialization</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5>Hospitals List</h5>
+                <ul class="list-group list-group-flush">
+                    <li th:each="h : ${hospitals}" class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" th:text="${h.name}">Hospital</span>
+                        <span class="badge bg-secondary" th:text="${h.contactNo}">Contact</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5>Specializations List</h5>
+                <ul class="list-group list-group-flush">
+                    <li th:each="s : ${specializations}" class="list-group-item">
+                        <span class="fw-bold" th:text="${s.name}">Spec</span>
+                        <small class="text-muted d-block" th:text="${s.description}">Desc</small>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

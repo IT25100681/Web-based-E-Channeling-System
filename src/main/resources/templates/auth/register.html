@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Patient Registration</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center my-4">
+        <div class="col-md-7">
+            <div class="card p-4 shadow">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold text-primary"><i class="fa-solid fa-user-plus me-2"></i>Patient Registration</h3>
+                    <p class="text-muted">Create a new patient account for online doctor bookings</p>
+                </div>
+                <form th:action="@{/register}" th:object="${registerForm}" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" th:field="*{name}" class="form-control" required placeholder="e.g. Kamal Silva">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" th:field="*{email}" class="form-control" required placeholder="e.g. kamal@gmail.com">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username *</label>
+                            <input type="text" th:field="*{username}" class="form-control" required placeholder="Choose a username">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password *</label>
+                            <input type="password" th:field="*{password}" class="form-control" required placeholder="Choose a password">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" th:field="*{phone}" class="form-control" placeholder="+94 77 123 4567">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">NIC / Passport</label>
+                            <input type="text" th:field="*{nic}" class="form-control" placeholder="NIC Number">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" th:field="*{dob}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" th:field="*{street}" class="form-control" placeholder="Street Address">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" th:field="*{city}" class="form-control" placeholder="City">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" th:field="*{postalCode}" class="form-control" placeholder="Postal Code">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mt-3">Register Patient Account</button>
+                </form>
+                <div class="text-center mt-3">
+                    <span class="text-muted">Already registered? </span>
+                    <a href="/login" class="fw-bold text-primary">Login Here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
