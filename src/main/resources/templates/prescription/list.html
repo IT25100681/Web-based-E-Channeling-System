@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Prescriptions</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <h2 class="mb-4"><i class="fa-solid fa-prescription-bottle-medical text-primary me-2"></i>Digital Prescriptions</h2>
+
+    <div class="card p-4 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Prescription ID</th>
+                    <th>Appointment Ref</th>
+                    <th>Patient Name</th>
+                    <th>Doctor Name</th>
+                    <th>Issue Date</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${prescriptions}">
+                    <td class="fw-bold" th:text="'#RX-' + ${p.prescriptionId}">RX-1</td>
+                    <td th:text="${p.referenceNo}">APP-123</td>
+                    <td th:text="${p.patientName}">Patient</td>
+                    <td th:text="${p.doctorName}">Doctor</td>
+                    <td th:text="${p.issueDate}">Date</td>
+                    <td>
+                        <a th:href="@{/prescriptions/{id}(id=${p.prescriptionId})}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-eye me-1"></i> View / Print</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(prescriptions)}">
+                    <td colspan="6" class="text-center text-muted py-4">No prescription records available.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Prescription Details</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-5 shadow border">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <div>
+                        <h3 class="fw-bold text-primary mb-0"><i class="fa-solid fa-hospital me-2"></i>LankaCare Medical Services</h3>
+                        <small class="text-muted">Digital Prescription Record</small>
+                    </div>
+                    <div class="text-end">
+                        <h5 class="fw-bold text-dark mb-0" th:text="'Rx #' + ${prescription.prescriptionId}">Rx #1</h5>
+                        <small class="text-muted" th:text="'Date: ' + ${prescription.issueDate}">Date</small>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <h6 class="text-muted mb-1">PATIENT DETAILS:</h6>
+                        <h5 class="fw-bold mb-0" th:text="${prescription.patientName}">Patient Name</h5>
+                        <small class="text-muted" th:text="'Appointment Ref: ' + ${prescription.referenceNo}">Ref</small>
+                    </div>
+                    <div class="col-6 text-end">
+                        <h6 class="text-muted mb-1">DOCTOR DETAILS:</h6>
+                        <h5 class="fw-bold mb-0" th:text="${prescription.doctorName}">Dr. Doctor Name</h5>
+                        <small class="text-primary" th:text="${prescription.specialization}">Specialization</small>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold border-bottom pb-2 mb-3"><i class="fa-solid fa-pills text-success me-2"></i>Prescribed Medications</h5>
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${prescription.items}">
+                        <td class="fw-bold" th:text="${item.medicationName} + ' (' + ${item.brand} + ')'">Med</td>
+                        <td th:text="${item.dosage}">Dosage</td>
+                        <td th:text="${item.frequency}">Freq</td>
+                        <td th:text="${item.durationDays} + ' Days'">5 Days</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${prescription.notes != null && !#strings.isEmpty(prescription.notes)}" class="bg-light p-3 rounded my-3">
+                    <strong>Doctor Notes & Special Instructions:</strong>
+                    <p class="mb-0 text-muted" th:text="${prescription.notes}">Notes</p>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+                    <a href="/prescriptions" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i> Back</a>
+                    <button onclick="window.print()" class="btn btn-primary"><i class="fa-solid fa-print me-1"></i> Download / Print Digital Prescription</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
