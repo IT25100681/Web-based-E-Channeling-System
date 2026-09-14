@@ -4,6 +4,9 @@ import com.sliit.echanneling.dto.request.PrescriptionFormDTO;
 import com.sliit.echanneling.dto.request.PrescriptionItemFormDTO;
 import com.sliit.echanneling.dto.response.PrescriptionViewDTO;
 import com.sliit.echanneling.model.*;
+import com.sliit.echanneling.model.enums.AppointmentStatus;
+import com.sliit.echanneling.model.enums.Channel;
+import com.sliit.echanneling.model.enums.NotificationStatus;
 import com.sliit.echanneling.repository.*;
 import com.sliit.echanneling.service.PrescriptionService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,8 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final MedicationRepository medicationRepository;
+    private final NotificationRepository notificationRepository;
+    private final UserAccountRepository userAccountRepository;
 
     @Override
     @Transactional
@@ -36,32 +42,65 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         Patient patient = patientRepository.findById(form.getPatientId())
                 .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + form.getPatientId()));
 
-        Prescription prescription = Prescription.builder()
-                .appointment(appointment)
-                .doctor(doctor)
-                .patient(patient)
-                .issueDate(LocalDate.now().toString())
-                .notes(form.getNotes())
-                .items(new ArrayList<>())
-                .build();
-
-        for (PrescriptionItemFormDTO itemDTO : form.getItems()) {
-            Medication medication = medicationRepository.findById(itemDTO.getMedicationId())
-                    .orElseThrow(() -> new IllegalArgumentException("Medication not found: " + itemDTO.getMedicationId()));
-
-            PrescriptionItem item = PrescriptionItem.builder()
-                    .prescription(prescription)
-                    .medication(medication)
-                    .dosage(itemDTO.getDosage())
-                    .frequency(itemDTO.getFrequency())
-                    .durationDays(itemDTO.getDurationDays())
-                    .instructions(itemDTO.getInstructions())
+        // Check if prescription already exists for this appointment
+        Optional<Prescription> existingPrescription = prescriptionRepository.findByAppointment_AppointmentId(form.getAppointmentId());
+        Prescription prescription;
+        if (existingPrescription.isPresent()) {
+            prescription = existingPrescription.get();
+            prescription.setNotes(form.getNotes());
+            prescription.getItems().clear();
+        } else {
+            prescription = Prescription.builder()
+                    .appointment(appointment)
+                    .doctor(doctor)
+                    .patient(patient)
+                    .issueDate(LocalDate.now().toString())
+                    .notes(form.getNotes())
+                    .items(new ArrayList<>())
                     .build();
-
-            prescription.getItems().add(item);
         }
 
-        return prescriptionRepository.save(prescription);
+        if (form.getItems() != null) {
+            for (PrescriptionItemFormDTO itemDTO : form.getItems()) {
+                if (itemDTO == null || itemDTO.getMedicationId() == null) {
+                    continue;
+                }
+                Medication medication = medicationRepository.findById(itemDTO.getMedicationId())
+                        .orElseThrow(() -> new IllegalArgumentException("Medication not found: " + itemDTO.getMedicationId()));
+
+                PrescriptionItem item = PrescriptionItem.builder()
+                        .prescription(prescription)
+                        .medication(medication)
+                        .dosage(itemDTO.getDosage())
+                        .frequency(itemDTO.getFrequency())
+                        .durationDays(itemDTO.getDurationDays())
+                        .instructions(itemDTO.getInstructions())
+                        .build();
+
+                prescription.getItems().add(item);
+            }
+        }
+
+        Prescription savedPrescription = prescriptionRepository.save(prescription);
+
+        // Update appointment status to COMPLETED
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointmentRepository.save(appointment);
+
+        // Send Notification to Patient
+        userAccountRepository.findByPatient_PatientId(patient.getPatientId()).ifPresent(acc -> {
+            Notification notif = Notification.builder()
+                    .userAccount(acc)
+                    .title("Digital Prescription Issued")
+                    .message("Dr. " + doctor.getName() + " has issued a digital prescription for your appointment " + appointment.getReferenceNo() + ".")
+                    .channel(Channel.IN_APP)
+                    .status(NotificationStatus.UNREAD)
+                    .createdAt(LocalDate.now().toString())
+                    .build();
+            notificationRepository.save(notif);
+        });
+
+        return savedPrescription;
     }
 
     @Override
@@ -92,6 +131,14 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Transactional(readOnly = true)
     public List<PrescriptionViewDTO> getPrescriptionsByDoctor(Long doctorId) {
         return prescriptionRepository.findByDoctor_StaffId(doctorId).stream()
+                .map(this::mapToViewDTO)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PrescriptionViewDTO> getAllPrescriptions() {
+        return prescriptionRepository.findAll().stream()
                 .map(this::mapToViewDTO)
                 .toList();
     }

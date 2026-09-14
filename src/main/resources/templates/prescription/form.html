@@ -8,7 +8,7 @@
 <body>
 <div layout:fragment="content">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="card p-4 shadow">
                 <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-file-prescription me-2"></i>Issue Digital Prescription</h3>
                 <form th:action="@{/prescriptions}" th:object="${prescriptionForm}" method="post">
@@ -18,40 +18,119 @@
 
                     <div class="mb-3">
                         <label class="form-label font-weight-bold">Prescription & Consultation Notes</label>
-                        <textarea th:field="*{notes}" class="form-control" rows="2" placeholder="e.g. Patient presented with fever and cough..."></textarea>
+                        <textarea th:field="*{notes}" class="form-control" rows="3" placeholder="e.g. Patient presented with fever and cough. Advised bed rest and hydration..."></textarea>
                     </div>
 
-                    <h5 class="fw-bold mt-4 mb-2">Prescribed Medications</h5>
+                    <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+                        <h5 class="fw-bold mb-0"><i class="fa-solid fa-pills text-success me-2"></i>Prescribed Medications</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addMedicationRow()">
+                            <i class="fa-solid fa-plus me-1"></i> Add Medication
+                        </button>
+                    </div>
+
                     <div id="itemContainer">
-                        <div class="border p-3 rounded mb-3 bg-light" th:each="item, stat : *{items}">
-                            <div class="row g-2">
+                        <div class="med-row border p-3 rounded mb-3 bg-light position-relative" th:each="item, stat : *{items}">
+                            <div class="row g-2 align-items-end">
                                 <div class="col-md-4">
-                                    <label class="form-label small">Medication *</label>
-                                    <select th:field="*{items[__${stat.index}__].medicationId}" class="form-select" required>
+                                    <label class="form-label small font-weight-bold">Medication *</label>
+                                    <select th:field="*{items[__${stat.index}__].medicationId}" class="form-select med-select" required>
+                                        <option value="">-- Select Medication --</option>
                                         <option th:each="m : ${medications}" th:value="${m.medicationId}" th:text="${m.name} + ' (' + ${m.brand} + ' - ' + ${m.unit} + ')'">Med</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label small">Dosage *</label>
-                                    <input type="text" th:field="*{items[__${stat.index}__].dosage}" class="form-control" placeholder="e.g. 1 Tablet" required>
+                                    <label class="form-label small font-weight-bold">Dosage *</label>
+                                    <input type="text" th:field="*{items[__${stat.index}__].dosage}" class="form-control med-dosage" placeholder="e.g. 1 Tablet" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label small">Frequency *</label>
-                                    <input type="text" th:field="*{items[__${stat.index}__].frequency}" class="form-control" placeholder="e.g. Twice Daily after meal" required>
+                                    <label class="form-label small font-weight-bold">Frequency *</label>
+                                    <input type="text" th:field="*{items[__${stat.index}__].frequency}" class="form-control med-frequency" placeholder="e.g. Twice Daily" required>
                                 </div>
-                                <div class="col-md-2">
-                                    <label class="form-label small">Days *</label>
-                                    <input type="number" th:field="*{items[__${stat.index}__].durationDays}" class="form-control" required min="1">
+                                <div class="col-md-1">
+                                    <label class="form-label small font-weight-bold">Days *</label>
+                                    <input type="number" th:field="*{items[__${stat.index}__].durationDays}" class="form-control med-days" required min="1" value="5">
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeMedicationRow(this)" title="Remove item">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mt-3"><i class="fa-solid fa-check me-1"></i> Save & Issue Prescription</button>
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mt-4 shadow-sm">
+                        <i class="fa-solid fa-check me-1"></i> Save & Issue Digital Prescription
+                    </button>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Hidden Template for Dynamic Rows -->
+    <template id="medRowTemplate">
+        <div class="med-row border p-3 rounded mb-3 bg-light position-relative">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small font-weight-bold">Medication *</label>
+                    <select name="items[INDEX].medicationId" class="form-select med-select" required>
+                        <option value="">-- Select Medication --</option>
+                        <option th:each="m : ${medications}" th:value="${m.medicationId}" th:text="${m.name} + ' (' + ${m.brand} + ' - ' + ${m.unit} + ')'">Med</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small font-weight-bold">Dosage *</label>
+                    <input type="text" name="items[INDEX].dosage" class="form-control med-dosage" placeholder="e.g. 1 Tablet" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small font-weight-bold">Frequency *</label>
+                    <input type="text" name="items[INDEX].frequency" class="form-control med-frequency" placeholder="e.g. Twice Daily" required>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label small font-weight-bold">Days *</label>
+                    <input type="number" name="items[INDEX].durationDays" class="form-control med-days" required min="1" value="5">
+                </div>
+                <div class="col-md-1 text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="removeMedicationRow(this)" title="Remove item">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        function addMedicationRow() {
+            const container = document.getElementById('itemContainer');
+            const template = document.getElementById('medRowTemplate').content.cloneNode(true);
+            const index = container.querySelectorAll('.med-row').length;
+
+            template.querySelectorAll('[name]').forEach(el => {
+                el.name = el.name.replace('INDEX', index);
+            });
+
+            container.appendChild(template);
+        }
+
+        function removeMedicationRow(button) {
+            const container = document.getElementById('itemContainer');
+            if (container.querySelectorAll('.med-row').length > 1) {
+                button.closest('.med-row').remove();
+                reindexRows();
+            } else {
+                alert("Prescription must contain at least one medication.");
+            }
+        }
+
+        function reindexRows() {
+            const rows = document.querySelectorAll('#itemContainer .med-row');
+            rows.forEach((row, idx) => {
+                row.querySelectorAll('[name]').forEach(el => {
+                    el.name = el.name.replace(/items\[\d+\]/, 'items[' + idx + ']');
+                });
+            });
+        }
+    </script>
 </div>
 </body>
 </html>

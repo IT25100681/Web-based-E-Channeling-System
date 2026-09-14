@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Manage Doctors</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fa-solid fa-user-doctor text-primary me-2"></i>Doctor Management</h2>
+        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#addDoctorForm">
+            <i class="fa-solid fa-plus me-1"></i> Register New Doctor
+        </button>
+    </div>
+
+    <!-- Doctor Registration Form (Collapsible / Card) -->
+    <div id="addDoctorForm" class="collapse mb-4 show">
+        <div class="card p-4 shadow-sm border-start border-primary border-4">
+            <h4 class="card-title text-primary mb-3"><i class="fa-solid fa-user-plus me-2"></i>Register Doctor Profile & Login Credentials</h4>
+            <form th:action="@{/admin/doctors}" th:object="${doctorForm}" method="post">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Full Name *</label>
+                        <input type="text" th:field="*{name}" class="form-control" placeholder="e.g. Dr. Sanath Jayasuriya" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Email Address *</label>
+                        <input type="email" th:field="*{email}" class="form-control" placeholder="doctor@lankacare.lk" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Phone Number *</label>
+                        <input type="text" th:field="*{phone}" class="form-control" placeholder="+94 77 123 4567" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Hospital Branch *</label>
+                        <select th:field="*{hospitalId}" class="form-select" required>
+                            <option value="">-- Select Hospital --</option>
+                            <option th:each="h : ${hospitals}" th:value="${h.hospitalId}" th:text="${h.name}">Hospital</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Department *</label>
+                        <select th:field="*{departmentId}" class="form-select" required>
+                            <option value="">-- Select Department --</option>
+                            <option th:each="d : ${departments}" th:value="${d.departmentId}" th:text="${d.name}">Department</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label font-weight-bold">Specialization *</label>
+                        <select th:field="*{specialization}" class="form-select" required>
+                            <option value="">-- Select Specialization --</option>
+                            <option th:each="s : ${specializations}" th:value="${s.name}" th:text="${s.name}">Cardiologist</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">Medical Qualification *</label>
+                        <input type="text" th:field="*{qualification}" class="form-control" placeholder="e.g. MBBS, MD (Cardiology)" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">SLMC License No *</label>
+                        <input type="text" th:field="*{licenseNo}" class="form-control" placeholder="e.g. SLMC-98765" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">Portal Username *</label>
+                        <input type="text" th:field="*{username}" class="form-control" placeholder="e.g. drsanath" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label font-weight-bold">Portal Password *</label>
+                        <input type="password" th:field="*{password}" class="form-control" placeholder="Assign secure password" required>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-success px-4 py-2 fw-bold"><i class="fa-solid fa-check me-1"></i> Register Doctor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registered Doctors Table -->
+    <div class="card p-4 shadow-sm">
+        <h4 class="mb-3"><i class="fa-solid fa-list-check text-primary me-2"></i>Registered Doctors</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Doctor Name</th>
+                    <th>Specialization</th>
+                    <th>Hospital & Dept</th>
+                    <th>License No</th>
+                    <th>Contact</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${doctors}">
+                    <td class="fw-bold">
+                        <i class="fa-solid fa-user-doctor text-primary me-2"></i><span th:text="${d.name}">Doctor</span>
+                    </td>
+                    <td><span class="badge bg-info text-dark" th:text="${d.specialization}">Spec</span></td>
+                    <td>
+                        <span th:text="${d.hospital != null ? d.hospital.name : 'N/A'}">Hospital</span> /
+                        <span class="text-muted" th:text="${d.department != null ? d.department.name : 'N/A'}">Dept</span>
+                    </td>
+                    <td th:text="${d.licenseNo}">SLMC-123</td>
+                    <td th:text="${d.phone}">Phone</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(doctors)}">
+                    <td colspan="5" class="text-center text-muted py-4">No doctors registered in the system yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

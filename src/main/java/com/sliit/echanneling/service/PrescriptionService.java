@@ -13,5 +13,6 @@ public interface PrescriptionService {
     PrescriptionViewDTO getPrescriptionByAppointment(Long appointmentId);
     List<PrescriptionViewDTO> getPrescriptionsByPatient(Long patientId);
     List<PrescriptionViewDTO> getPrescriptionsByDoctor(Long doctorId);
+    List<PrescriptionViewDTO> getAllPrescriptions();
     List<Medication> getAllMedications();
 }
