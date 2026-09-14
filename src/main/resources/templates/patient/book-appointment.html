@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Confirm Booking</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-calendar-check me-2"></i>Confirm Appointment Booking</h3>
+                <div class="bg-light p-3 rounded mb-3">
+                    <h5 class="fw-bold" th:text="${schedule.doctorName}">Dr. Name</h5>
+                    <p class="mb-1 text-primary" th:text="${schedule.specialization}">Specialization</p>
+                    <p class="mb-1 text-muted" th:text="'Date: ' + ${schedule.scheduleDate} + ' | Time: ' + ${schedule.startTime}"></p>
+                    <p class="mb-0 fw-bold text-success" th:text="'Consultation Fee: LKR ' + ${schedule.consultationFee}"></p>
+                </div>
+                <form th:action="@{/patient/appointments/book}" th:object="${bookingForm}" method="post">
+                    <input type="hidden" th:field="*{scheduleId}">
+                    <input type="hidden" th:field="*{patientId}">
+                    <input type="hidden" th:field="*{appointmentDate}">
+                    <input type="hidden" th:field="*{appointmentTime}">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Payment Method</label>
+                        <select th:field="*{paymentMethod}" class="form-select">
+                            <option value="CARD">Debit / Credit Card (Online)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Proceed to Checkout & Pay</button>
+                    <a href="/patient/appointments/search" class="btn btn-link text-muted w-100 mt-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

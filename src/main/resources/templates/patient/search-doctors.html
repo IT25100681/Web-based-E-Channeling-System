@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Search Doctors & Schedules</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="card p-4 shadow-sm mb-4">
+        <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass me-2"></i>Search & Channel Doctors</h3>
+        <form th:action="@{/patient/appointments/search}" method="get" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Specialization</label>
+                <select name="specialization" class="form-select">
+                    <option value="">-- All Specializations --</option>
+                    <option th:each="spec : ${specializations}" th:value="${spec.name}" th:text="${spec.name}" th:selected="${spec.name == selectedSpec}">Spec</option>
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Preferred Date</label>
+                <input type="date" name="date" class="form-control" th:value="${selectedDate}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-search me-1"></i> Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <h4 class="mb-3">Available Channeling Sessions</h4>
+    <div class="row">
+        <div th:each="s : ${schedules}" class="col-md-6">
+            <div class="card p-3 shadow-sm border-start border-primary border-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0" th:text="${s.doctorName}">Dr. Name</h5>
+                        <span class="badge bg-info text-white" th:text="${s.specialization}">Specialization</span>
+                        <small class="text-muted ms-2" th:text="${s.departmentName}">Dept</small>
+                    </div>
+                    <span class="fs-5 fw-bold text-success" th:text="'LKR ' + ${s.consultationFee}">LKR 2000</span>
+                </div>
+                <hr class="my-2">
+                <div class="row text-muted small mb-3">
+                    <div class="col-6"><i class="fa-solid fa-calendar me-1"></i> <span th:text="${s.scheduleDate}">2026-10-01</span></div>
+                    <div class="col-6"><i class="fa-solid fa-clock me-1"></i> <span th:text="${s.startTime} + ' - ' + ${s.endTime}">09:00 - 12:00</span></div>
+                    <div class="col-12 mt-1"><i class="fa-solid fa-ticket me-1"></i> Booked: <span th:text="${s.bookedCount}">0</span> / <span th:text="${s.maxPatients}">15</span> slots</div>
+                </div>
+                <a th:href="@{/patient/appointments/book/{id}(id=${s.scheduleId})}" class="btn btn-outline-primary btn-sm w-100 fw-bold">
+                    <i class="fa-solid fa-calendar-plus me-1"></i> Book Appointment Now
+                </a>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(schedules)}" class="col-12 text-center py-5">
+            <i class="fa-solid fa-user-doctor-hair fa-3x text-muted mb-3"></i>
+            <p class="text-muted fs-5">No available doctor channeling schedules found matching your search.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
