@@ -43,6 +43,7 @@
                         <div class="d-flex gap-1">
                             <a th:if="${a.status.name() == 'COMPLETED'}" th:href="@{/prescriptions/appointment/{id}(id=${a.appointmentId})}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-prescription-bottle-medical me-1"></i> Rx</a>
                             <a th:if="${a.paymentStatus == 'PAID'}" th:href="@{/patient/payments/receipt/{id}(id=${a.appointmentId})}" class="btn btn-sm btn-outline-success">Receipt</a>
+                            <a th:if="${a.status.name() == 'PENDING' || a.status.name() == 'CONFIRMED'}" th:href="@{/patient/appointments/{id}/reschedule(id=${a.appointmentId})}" class="btn btn-sm btn-outline-warning text-dark"><i class="fa-solid fa-calendar-days me-1"></i> Reschedule</a>
                             <form th:if="${a.status.name() == 'PENDING' || a.status.name() == 'CONFIRMED'}" th:action="@{/patient/appointments/{id}/cancel(id=${a.appointmentId})}" method="post">
                                 <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</button>
                             </form>

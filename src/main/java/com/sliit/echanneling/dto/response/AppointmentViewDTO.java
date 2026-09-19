@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class AppointmentViewDTO {
     private Long appointmentId;
+    private Long scheduleId;
     private String referenceNo;
     private Long patientId;
     private String patientName;

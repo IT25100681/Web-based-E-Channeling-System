@@ -1,6 +1,7 @@
 package com.sliit.echanneling.service.impl;
 
 import com.sliit.echanneling.dto.request.BookingRequestDTO;
+import com.sliit.echanneling.dto.request.RescheduleRequestDTO;
 import com.sliit.echanneling.dto.response.AppointmentViewDTO;
 import com.sliit.echanneling.model.Appointment;
 import com.sliit.echanneling.model.DoctorSchedule;
@@ -126,6 +127,42 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional
+    public AppointmentViewDTO rescheduleAppointment(Long appointmentId, RescheduleRequestDTO request, String username) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED || appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot reschedule a cancelled or completed appointment!");
+        }
+
+        DoctorSchedule targetSchedule = scheduleRepository.findById(request.getNewScheduleId())
+                .orElseThrow(() -> new IllegalArgumentException("Schedule not found: " + request.getNewScheduleId()));
+
+        boolean isSameSchedule = appointment.getSchedule().getScheduleId().equals(targetSchedule.getScheduleId());
+        long activeCount = appointmentRepository.countActiveBookingsBySchedule(targetSchedule.getScheduleId());
+
+        if (!isSameSchedule && activeCount >= targetSchedule.getMaxPatients()) {
+            throw new IllegalStateException("The selected schedule session is fully booked!");
+        }
+
+        String date = request.getAppointmentDate() != null && !request.getAppointmentDate().isBlank()
+                ? request.getAppointmentDate() : targetSchedule.getScheduleDate();
+        String requestedTime = request.getAppointmentTime() != null && !request.getAppointmentTime().isBlank()
+                ? request.getAppointmentTime() : targetSchedule.getStartTime();
+
+        String slotTime = calculateAvailableSlotTime(targetSchedule.getDoctor().getStaffId(), targetSchedule, date, requestedTime);
+
+        appointment.setSchedule(targetSchedule);
+        appointment.setDoctor(targetSchedule.getDoctor());
+        appointment.setAppointmentDate(date);
+        appointment.setAppointmentTime(slotTime);
+
+        Appointment updated = appointmentRepository.save(appointment);
+        return mapToViewDTO(updated);
+    }
+
+    @Override
+    @Transactional
     public void cancelAppointment(Long appointmentId, String username) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
@@ -149,6 +186,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return AppointmentViewDTO.builder()
                 .appointmentId(a.getAppointmentId())
+                .scheduleId(a.getSchedule() != null ? a.getSchedule().getScheduleId() : null)
                 .referenceNo(a.getReferenceNo())
                 .patientId(a.getPatient().getPatientId())
                 .patientName(a.getPatient().getName())
