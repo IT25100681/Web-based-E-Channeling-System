@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Reschedule Appointment</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Reschedule Appointment</h3>
+
+                <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+
+                <div class="bg-light p-3 rounded mb-4">
+                    <h5 class="fw-bold" th:text="${appointment.doctorName}">Dr. Name</h5>
+                    <p class="mb-1 text-primary" th:text="${appointment.specialization}">Specialization</p>
+                    <p class="mb-1 text-muted" th:text="'Current Appointment: ' + ${appointment.appointmentDate} + ' at ' + ${appointment.appointmentTime}"></p>
+                    <p class="mb-0 text-secondary" th:text="'Reference No: ' + ${appointment.referenceNo}"></p>
+                </div>
+
+                <form th:action="@{/patient/appointments/{id}/reschedule(id=${appointment.appointmentId})}" th:object="${rescheduleForm}" method="post">
+                    <input type="hidden" th:field="*{appointmentId}">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Available Schedule Session</label>
+                        <select th:field="*{newScheduleId}" class="form-select" required>
+                            <option th:each="s : ${schedules}"
+                                    th:value="${s.scheduleId}"
+                                    th:text="${s.scheduleDate} + ' (' + ${s.startTime} + ' - ' + ${s.endTime} + ') - Fee: LKR ' + ${s.consultationFee}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Appointment Date</label>
+                            <input type="date" th:field="*{appointmentDate}" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Preferred Start Time</label>
+                            <input type="time" th:field="*{appointmentTime}" class="form-control">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-dark"><i class="fa-solid fa-calendar-days me-1"></i> Confirm Reschedule</button>
+                    <a href="/patient/appointments" class="btn btn-link text-muted w-100 mt-2">Back to My Appointments</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

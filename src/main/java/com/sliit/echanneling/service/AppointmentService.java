@@ -1,6 +1,7 @@
 package com.sliit.echanneling.service;
 
 import com.sliit.echanneling.dto.request.BookingRequestDTO;
+import com.sliit.echanneling.dto.request.RescheduleRequestDTO;
 import com.sliit.echanneling.dto.response.AppointmentViewDTO;
 import com.sliit.echanneling.model.Appointment;
 
@@ -12,6 +13,7 @@ public interface AppointmentService {
     AppointmentViewDTO getAppointmentById(Long appointmentId);
     List<AppointmentViewDTO> getAppointmentsByPatient(Long patientId);
     List<AppointmentViewDTO> getAppointmentsByDoctor(Long doctorId);
+    AppointmentViewDTO rescheduleAppointment(Long appointmentId, RescheduleRequestDTO request, String username);
     void cancelAppointment(Long appointmentId, String username);
     void completeAppointment(Long appointmentId);
 }
