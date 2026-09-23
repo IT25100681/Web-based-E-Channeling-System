@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Hospital Management</title>
+    <style>
+        .hm-toolbar { gap: .5rem; }
+        .hm-status { min-width: 74px; }
+        .hm-skeleton { display: none; height: 10px; border-radius: 4px; background: linear-gradient(90deg,#e9ecef,#f8f9fa,#e9ecef); background-size: 200% 100%; animation: hmPulse 1s linear infinite; }
+        .hm-loading .hm-skeleton { display: block; }
+        @keyframes hmPulse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    </style>
+</head>
+<body>
+<div layout:fragment="content" id="hospitalManagementRoot">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="/admin/dashboard">Admin</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hospital Management</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 hm-toolbar">
+        <div>
+            <h2 class="mb-1"><i class="fa-solid fa-building-circle-check text-primary me-2"></i>Hospitals, Departments & Specializations</h2>
+            <p class="text-muted mb-0">Manage core directory data, settings, and operation history.</p>
+        </div>
+        <form th:action="@{/admin/hospital-management}" method="get" class="d-flex" id="searchForm">
+            <input type="search" name="q" th:value="${query}" class="form-control form-control-sm me-2" placeholder="Search records">
+            <button class="btn btn-outline-primary btn-sm" type="submit"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+        </form>
+    </div>
+
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            <div th:if="${infoMessage}" class="toast show text-bg-success border-0" role="status">
+                <div class="d-flex">
+                    <div class="toast-body"><i class="fa-solid fa-circle-check me-2"></i><span th:text="${infoMessage}">Saved</span></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+            <div th:if="${errorMessage}" class="toast show text-bg-danger border-0" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body"><i class="fa-solid fa-triangle-exclamation me-2"></i><span th:text="${errorMessage}">Error</span></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hm-skeleton mb-2"></div>
+    <div class="hm-skeleton mb-3 w-75"></div>
+
+    <ul class="nav nav-tabs mb-3" id="hmTabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#hospitals" type="button">Hospitals</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#departments" type="button">Departments</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#specializations" type="button">Specializations</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#settings" type="button">Settings & Operations</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <section class="tab-pane fade show active" id="hospitals">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm">
+                        <h5 class="card-title text-primary">Add Hospital</h5>
+                        <form th:action="@{/admin/hospital-management/hospitals}" th:object="${hospitalForm}" method="post" class="hm-write-form" novalidate>
+                            <div class="mb-2">
+                                <label class="form-label">Code</label>
+                                <input th:field="*{code}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="50" pattern="[A-Za-z0-9_-]+">
+                                <div class="invalid-feedback d-block" th:errors="*{code}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Name</label>
+                                <input th:field="*{name}" type="text" class="form-control" th:errorclass="is-invalid" required maxlength="255" pattern="[A-Za-z0-9 .,'&()/-]+">
+                                <div class="invalid-feedback d-block" th:errors="*{name}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Contact Number</label>
+                                <input th:field="*{contactNo}" type="tel" class="form-control" th:errorclass="is-invalid" maxlength="50" pattern="[+]?[0-9 ()-]{7,20}">
+                                <div class="invalid-feedback d-block" th:errors="*{contactNo}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Street</label>
+                                <input th:field="*{street}" type="text" class="form-control" th:errorclass="is-invalid" maxlength="255">
+                                <div class="invalid-feedback d-block" th:errors="*{street}"></div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-7">
+                                    <label class="form-label">City</label>
+                                    <input th:field="*{city}" type="text" class="form-control" th:errorclass="is-invalid" maxlength="255">
+                                    <div class="invalid-feedback d-block" th:errors="*{city}"></div>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label">Postal Code</label>
+                                    <input th:field="*{postalCode}" type="text" class="form-control" th:errorclass="is-invalid" maxlength="50">
+                                    <div class="invalid-feedback d-block" th:errors="*{postalCode}"></div>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch my-3">
+                                <input th:field="*{active}" class="form-check-input" type="checkbox">
+                                <label class="form-check-label">Active</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Hospital</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card p-3 shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Contact</th><th>City</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <tbody>
+                                <tr th:if="${#lists.isEmpty(hospitals)}"><td colspan="6" class="text-center text-muted py-4">No hospitals found.</td></tr>
+                                <tr th:each="h : ${hospitals}">
+                                    <td class="fw-semibold" th:text="${h.code ?: 'N/A'}">CODE</td>
+                                    <td th:text="${h.name}">Name</td>
+                                    <td th:text="${h.contactNo ?: 'N/A'}">Contact</td>
+                                    <td th:text="${h.address != null ? h.address.city : 'N/A'}">City</td>
+                                    <td><span class="badge hm-status" th:classappend="${h.active} ? ' bg-success' : ' bg-secondary'" th:text="${h.active} ? 'Active' : 'Inactive'">Active</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editHospital' + h.hospitalId}"><i class="fa-solid fa-pen"></i></button>
+                                        <form th:if="${h.active}" th:action="@{/admin/hospital-management/hospitals/{id}/deactivate(id=${h.hospitalId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
+                                        <form th:unless="${h.active}" th:action="@{/admin/hospital-management/hospitals/{id}/restore(id=${h.hospitalId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab-pane fade" id="departments">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm">
+                        <h5 class="card-title text-success">Add Department</h5>
+                        <form th:action="@{/admin/hospital-management/departments}" th:object="${departmentForm}" method="post" class="hm-write-form" novalidate>
+                            <div class="mb-2">
+                                <label class="form-label">Code</label>
+                                <input th:field="*{code}" class="form-control" th:errorclass="is-invalid" required maxlength="50" pattern="[A-Za-z0-9_-]+">
+                                <div class="invalid-feedback d-block" th:errors="*{code}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Name</label>
+                                <input th:field="*{name}" class="form-control" th:errorclass="is-invalid" required maxlength="255">
+                                <div class="invalid-feedback d-block" th:errors="*{name}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Hospital</label>
+                                <select th:field="*{hospitalId}" class="form-select" th:errorclass="is-invalid" required>
+                                    <option value="">Select hospital</option>
+                                    <option th:each="h : ${hospitals}" th:value="${h.hospitalId}" th:text="${h.name}">Hospital</option>
+                                </select>
+                                <div class="invalid-feedback d-block" th:errors="*{hospitalId}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Description</label>
+                                <textarea th:field="*{description}" class="form-control" th:errorclass="is-invalid" rows="3" maxlength="500"></textarea>
+                                <div class="invalid-feedback d-block" th:errors="*{description}"></div>
+                            </div>
+                            <div class="form-check form-switch my-3">
+                                <input th:field="*{active}" class="form-check-input" type="checkbox">
+                                <label class="form-check-label">Active</label>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Department</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card p-3 shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Hospital</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <tbody>
+                                <tr th:if="${#lists.isEmpty(departments)}"><td colspan="5" class="text-center text-muted py-4">No departments found.</td></tr>
+                                <tr th:each="d : ${departments}">
+                                    <td class="fw-semibold" th:text="${d.code ?: 'N/A'}">CODE</td>
+                                    <td th:text="${d.name}">Name</td>
+                                    <td th:text="${d.hospital != null ? d.hospital.name : 'N/A'}">Hospital</td>
+                                    <td><span class="badge hm-status" th:classappend="${d.active} ? ' bg-success' : ' bg-secondary'" th:text="${d.active} ? 'Active' : 'Inactive'">Active</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editDepartment' + d.departmentId}"><i class="fa-solid fa-pen"></i></button>
+                                        <form th:if="${d.active}" th:action="@{/admin/hospital-management/departments/{id}/deactivate(id=${d.departmentId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
+                                        <form th:unless="${d.active}" th:action="@{/admin/hospital-management/departments/{id}/restore(id=${d.departmentId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab-pane fade" id="specializations">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm">
+                        <h5 class="card-title text-info">Add Specialization</h5>
+                        <form th:action="@{/admin/hospital-management/specializations}" th:object="${specializationForm}" method="post" class="hm-write-form" novalidate>
+                            <div class="mb-2">
+                                <label class="form-label">Code</label>
+                                <input th:field="*{code}" class="form-control" th:errorclass="is-invalid" required maxlength="50" pattern="[A-Za-z0-9_-]+">
+                                <div class="invalid-feedback d-block" th:errors="*{code}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Name</label>
+                                <input th:field="*{name}" class="form-control" th:errorclass="is-invalid" required maxlength="255">
+                                <div class="invalid-feedback d-block" th:errors="*{name}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Description</label>
+                                <textarea th:field="*{description}" class="form-control" th:errorclass="is-invalid" rows="3" maxlength="500"></textarea>
+                                <div class="invalid-feedback d-block" th:errors="*{description}"></div>
+                            </div>
+                            <div class="form-check form-switch my-3">
+                                <input th:field="*{active}" class="form-check-input" type="checkbox">
+                                <label class="form-check-label">Active</label>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Specialization</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card p-3 shadow-sm">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Description</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <tbody>
+                                <tr th:if="${#lists.isEmpty(specializations)}"><td colspan="5" class="text-center text-muted py-4">No specializations found.</td></tr>
+                                <tr th:each="s : ${specializations}">
+                                    <td class="fw-semibold" th:text="${s.code ?: 'N/A'}">CODE</td>
+                                    <td th:text="${s.name}">Name</td>
+                                    <td th:text="${s.description ?: 'N/A'}">Description</td>
+                                    <td><span class="badge hm-status" th:classappend="${s.active} ? ' bg-success' : ' bg-secondary'" th:text="${s.active} ? 'Active' : 'Inactive'">Active</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editSpecialization' + s.specializationId}"><i class="fa-solid fa-pen"></i></button>
+                                        <form th:if="${s.active}" th:action="@{/admin/hospital-management/specializations/{id}/deactivate(id=${s.specializationId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
+                                        <form th:unless="${s.active}" th:action="@{/admin/hospital-management/specializations/{id}/restore(id=${s.specializationId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tab-pane fade" id="settings">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card p-3 shadow-sm mb-3 border-0 bg-light">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-server fs-5 text-primary me-2"></i>
+                            <h5 class="card-title mb-0">System Operations &amp; Backup</h5>
+                        </div>
+                        <p class="small text-muted mb-3">Download complete system backups and manage operational audit checkpoints.</p>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark mb-1">Database Backup Export</label>
+                            <button type="button" id="backupDownloadButton" class="btn btn-primary btn-sm w-100 py-2 shadow-sm">
+                                <i class="fa-solid fa-cloud-arrow-down me-1"></i>
+                                <span class="hm-backup-label fw-semibold">Download Backup (JSON)</span>
+                                <span class="spinner-border spinner-border-sm ms-1 d-none" aria-hidden="true"></span>
+                            </button>
+                            <small class="text-muted d-block mt-1">Logs a checkpoint to Recent Activity and streams the JSON database export.</small>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-dark mb-1">Audit Checkpoints</label>
+                            <form th:action="@{/admin/hospital-management/operations/backup}" method="post" class="hm-write-form mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fa-solid fa-bookmark me-1"></i> Record Backup Checkpoint Only
+                                </button>
+                            </form>
+                            <form th:action="@{/admin/hospital-management/operations/recovery}" method="post" class="hm-write-form">
+                                <button class="btn btn-outline-secondary btn-sm w-100">
+                                    <i class="fa-solid fa-clock-rotate-left me-1"></i> Record Recovery Checkpoint
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="border-top pt-2 mt-2 text-center">
+                            <a th:href="@{/api/system-operations/download-backup}" download class="small text-decoration-none">
+                                <i class="fa-solid fa-file-code me-1"></i> Direct Backup JSON Stream
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card p-3 shadow-sm border-0">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-sliders fs-5 text-secondary me-2"></i>
+                            <h5 class="card-title mb-0">System Setting</h5>
+                        </div>
+                        <p class="small text-muted mb-2">Configure module parameters and flags.</p>
+                        <form th:action="@{/admin/hospital-management/settings}" th:object="${settingForm}" method="post" class="hm-write-form" novalidate>
+                            <div class="mb-2">
+                                <label class="form-label">Key</label>
+                                <input th:field="*{settingKey}" class="form-control form-control-sm" th:errorclass="is-invalid" required maxlength="255" pattern="[A-Za-z0-9._-]+">
+                                <div class="invalid-feedback d-block" th:errors="*{settingKey}"></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Value</label>
+                                <input th:field="*{settingValue}" class="form-control form-control-sm" th:errorclass="is-invalid" required maxlength="255">
+                                <div class="invalid-feedback d-block" th:errors="*{settingValue}"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea th:field="*{description}" class="form-control form-control-sm" th:errorclass="is-invalid" rows="2" maxlength="500"></textarea>
+                                <div class="invalid-feedback d-block" th:errors="*{description}"></div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm w-100"><i class="fa-solid fa-gear me-1"></i> Save Setting</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card p-3 shadow-sm">
+                        <h5>Recent Activity</h5>
+                        <div th:if="${#lists.isEmpty(activityLogs)}" class="text-muted text-center py-4">No activity recorded yet.</div>
+                        <div class="list-group list-group-flush" th:unless="${#lists.isEmpty(activityLogs)}">
+                            <div class="list-group-item px-0" th:each="log : ${activityLogs}">
+                                <div class="d-flex justify-content-between">
+                                    <strong th:text="${log.action}">ACTION</strong>
+                                    <small class="text-muted" th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm')}">Time</small>
+                                </div>
+                                <div th:text="${log.message}">Message</div>
+                                <small class="text-muted" th:text="${log.entityType + ' by ' + log.actor}">Actor</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-3 shadow-sm">
+                        <h5>System Info</h5>
+                        <div th:if="${#lists.isEmpty(settings)}" class="text-muted text-center py-4">No settings found.</div>
+                        <div class="table-responsive" th:unless="${#lists.isEmpty(settings)}">
+                            <table class="table table-sm mb-0">
+                                <thead><tr><th>Key</th><th>Value</th><th>Description</th></tr></thead>
+                                <tbody>
+                                <tr th:each="setting : ${settings}">
+                                    <td th:text="${setting.settingKey}">key</td>
+                                    <td th:text="${setting.settingValue}">value</td>
+                                    <td th:text="${setting.description ?: 'N/A'}">description</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div th:each="h : ${hospitals}" class="modal fade" th:id="${'editHospital' + h.hospitalId}" tabindex="-1">
+        <div class="modal-dialog modal-lg"><div class="modal-content">
+            <form th:action="@{/admin/hospital-management/hospitals/{id}(id=${h.hospitalId})}" method="post" class="hm-write-form">
+                <div class="modal-header"><h5 class="modal-title">Edit Hospital</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body row g-2">
+                    <div class="col-md-4"><label class="form-label">Code</label><input name="code" th:value="${h.code}" class="form-control" required maxlength="50" pattern="[A-Za-z0-9_-]+"></div>
+                    <div class="col-md-8"><label class="form-label">Name</label><input name="name" th:value="${h.name}" class="form-control" required maxlength="255"></div>
+                    <div class="col-md-4"><label class="form-label">Contact</label><input name="contactNo" th:value="${h.contactNo}" class="form-control" pattern="[+]?[0-9 ()-]{7,20}"></div>
+                    <div class="col-md-4"><label class="form-label">Street</label><input name="street" th:value="${h.address != null ? h.address.street : ''}" class="form-control"></div>
+                    <div class="col-md-2"><label class="form-label">City</label><input name="city" th:value="${h.address != null ? h.address.city : ''}" class="form-control"></div>
+                    <div class="col-md-2"><label class="form-label">Postal</label><input name="postalCode" th:value="${h.address != null ? h.address.postalCode : ''}" class="form-control"></div>
+                    <div class="col-12"><input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${h.active}"><label class="form-check-label">Active</label></div></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
+            </form>
+        </div></div>
+    </div>
+
+    <div th:each="d : ${departments}" class="modal fade" th:id="${'editDepartment' + d.departmentId}" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <form th:action="@{/admin/hospital-management/departments/{id}(id=${d.departmentId})}" method="post" class="hm-write-form">
+                <div class="modal-header"><h5 class="modal-title">Edit Department</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <label class="form-label">Code</label><input name="code" th:value="${d.code}" class="form-control mb-2" required maxlength="50" pattern="[A-Za-z0-9_-]+">
+                    <label class="form-label">Name</label><input name="name" th:value="${d.name}" class="form-control mb-2" required maxlength="255">
+                    <label class="form-label">Hospital</label><select name="hospitalId" class="form-select mb-2" required><option th:each="h : ${hospitals}" th:value="${h.hospitalId}" th:selected="${d.hospital != null and d.hospital.hospitalId == h.hospitalId}" th:text="${h.name}">Hospital</option></select>
+                    <label class="form-label">Description</label><textarea name="description" class="form-control mb-2" rows="3" maxlength="500" th:text="${d.description}"></textarea>
+                    <input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${d.active}"><label class="form-check-label">Active</label></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
+            </form>
+        </div></div>
+    </div>
+
+    <div th:each="s : ${specializations}" class="modal fade" th:id="${'editSpecialization' + s.specializationId}" tabindex="-1">
+        <div class="modal-dialog"><div class="modal-content">
+            <form th:action="@{/admin/hospital-management/specializations/{id}(id=${s.specializationId})}" method="post" class="hm-write-form">
+                <div class="modal-header"><h5 class="modal-title">Edit Specialization</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <label class="form-label">Code</label><input name="code" th:value="${s.code}" class="form-control mb-2" required maxlength="50" pattern="[A-Za-z0-9_-]+">
+                    <label class="form-label">Name</label><input name="name" th:value="${s.name}" class="form-control mb-2" required maxlength="255">
+                    <label class="form-label">Description</label><textarea name="description" class="form-control mb-2" rows="3" maxlength="500" th:text="${s.description}"></textarea>
+                    <input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${s.active}"><label class="form-check-label">Active</label></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
+            </form>
+        </div></div>
+    </div>
+
+    <script>
+        function showHospitalManagementToast(message, isError) {
+            var container = document.querySelector('.toast-container');
+            if (!container) {
+                return;
+            }
+            var toast = document.createElement('div');
+            toast.className = 'toast show border-0 ' + (isError ? 'text-bg-danger' : 'text-bg-success');
+            toast.setAttribute('role', isError ? 'alert' : 'status');
+            toast.innerHTML = '<div class="d-flex"><div class="toast-body">' + message + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>';
+            container.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 5000);
+        }
+
+        document.querySelectorAll('.hm-write-form, #searchForm').forEach(function (form) {
+            form.addEventListener('submit', function () {
+                document.getElementById('hospitalManagementRoot').classList.add('hm-loading');
+            });
+        });
+        var backupButton = document.getElementById('backupDownloadButton');
+        if (backupButton) {
+            backupButton.addEventListener('click', async function () {
+                var label = backupButton.querySelector('.hm-backup-label');
+                var spinner = backupButton.querySelector('.spinner-border');
+                backupButton.disabled = true;
+                label.textContent = 'Preparing backup';
+                spinner.classList.remove('d-none');
+                try {
+                    var recordResponse = await fetch('/api/system-operations/record-backup', { method: 'POST' });
+                    if (!recordResponse.ok) {
+                        throw new Error('Could not record backup checkpoint.');
+                    }
+                    var backupResponse = await fetch('/api/system-operations/download-backup');
+                    if (!backupResponse.ok) {
+                        throw new Error('Could not export backup file.');
+                    }
+                    var blob = await backupResponse.blob();
+                    var disposition = backupResponse.headers.get('Content-Disposition') || '';
+                    var match = disposition.match(/filename="?([^"]+)"?/);
+                    var filename = match ? match[1] : 'hospital_system_backup.json';
+                    var url = window.URL.createObjectURL(blob);
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    window.URL.revokeObjectURL(url);
+                    showHospitalManagementToast('Backup file downloaded successfully.', false);
+                    setTimeout(function () {
+                        window.location.hash = 'settings';
+                        window.location.reload();
+                    }, 1000);
+                } catch (error) {
+                    showHospitalManagementToast(error.message || 'Backup export failed.', true);
+                } finally {
+                    backupButton.disabled = false;
+                    label.textContent = 'Download Backup (JSON)';
+                    spinner.classList.add('d-none');
+                }
+            });
+        }
+        var hash = window.location.hash;
+        if (hash) {
+            var tab = document.querySelector('[data-bs-target="' + hash + '"]');
+            if (tab && window.bootstrap) {
+                new bootstrap.Tab(tab).show();
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

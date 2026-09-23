@@ -20,5 +20,12 @@ public class Specialization {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(name = "specialization_code")
+    private String code;
+
     private String description;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 }

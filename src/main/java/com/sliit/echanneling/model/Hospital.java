@@ -21,9 +21,16 @@ public class Hospital {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "hospital_code")
+    private String code;
+
     @Embedded
     private Address address;
 
     @Column(name = "contact_no")
     private String contactNo;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 }

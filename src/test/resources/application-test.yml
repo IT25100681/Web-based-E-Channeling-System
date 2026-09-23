@@ -13,3 +13,6 @@ spring:
 
   flyway:
     enabled: false
+
+app:
+  open-browser-on-start: false

@@ -20,9 +20,16 @@ public class Department {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "department_code")
+    private String code;
+
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean active = true;
 }
