@@ -2,6 +2,7 @@ package com.sliit.echanneling.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import java.math.BigDecimal;
 
@@ -16,6 +17,8 @@ public class PaymentRequestDTO {
     @NotBlank(message = "Payment method is required")
     private String paymentMethod;
 
+    @NotBlank(message = "Card number must contain exactly 16 digits.")
+    @Pattern(regexp = "^\\d{16}$", message = "Card number must contain exactly 16 digits.")
     private String cardNumber;
     private String cardExpiry;
     private String cvv;

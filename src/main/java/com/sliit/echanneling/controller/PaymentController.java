@@ -5,9 +5,11 @@ import com.sliit.echanneling.dto.response.AppointmentViewDTO;
 import com.sliit.echanneling.model.Payment;
 import com.sliit.echanneling.service.AppointmentService;
 import com.sliit.echanneling.service.PaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -33,11 +35,23 @@ public class PaymentController {
     }
 
     @PostMapping("/process")
-    public String processPayment(@ModelAttribute("paymentRequest") PaymentRequestDTO request, Model model) {
+    public String processPayment(@Valid @ModelAttribute("paymentRequest") PaymentRequestDTO request, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            AppointmentViewDTO app = appointmentService.getAppointmentById(request.getAppointmentId());
+            model.addAttribute("appointment", app);
+            String errorMsg = bindingResult.getFieldError("cardNumber") != null
+                    ? bindingResult.getFieldError("cardNumber").getDefaultMessage()
+                    : "Card number must contain exactly 16 digits.";
+            model.addAttribute("errorMessage", errorMsg);
+            return "payment/checkout";
+        }
+
         Payment payment = paymentService.processPayment(request);
         if ("PAID".equalsIgnoreCase(payment.getPaymentStatus().name())) {
             return "redirect:/patient/payments/receipt/" + payment.getAppointment().getAppointmentId();
         } else {
+            AppointmentViewDTO app = appointmentService.getAppointmentById(request.getAppointmentId());
+            model.addAttribute("appointment", app);
             model.addAttribute("errorMessage", "Payment transaction failed. Please try again with valid card credentials.");
             return "payment/checkout";
         }

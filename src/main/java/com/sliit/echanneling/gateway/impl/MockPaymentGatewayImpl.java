@@ -12,7 +12,10 @@ public class MockPaymentGatewayImpl implements PaymentGateway {
     @Override
     public PaymentResult processPayment(PaymentRequestDTO request) {
         // Simulate card validation logic
-        if (request.getCardNumber() != null && request.getCardNumber().endsWith("0000")) {
+        if (request.getCardNumber() == null || !request.getCardNumber().matches("^\\d{16}$")) {
+            return new PaymentResult(false, null, "Card number must contain exactly 16 digits.");
+        }
+        if (request.getCardNumber().endsWith("0000")) {
             return new PaymentResult(false, null, "Card declined: Invalid card details");
         }
         String ref = "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();

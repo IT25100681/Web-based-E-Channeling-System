@@ -30,7 +30,7 @@
                     </div>
                 </div>
 
-                <form th:action="@{/patient/payments/process}" th:object="${paymentRequest}" method="post">
+                <form id="paymentForm" th:action="@{/patient/payments/process}" th:object="${paymentRequest}" method="post" novalidate>
                     <input type="hidden" th:field="*{appointmentId}">
                     <input type="hidden" th:field="*{amount}">
                     <input type="hidden" th:field="*{paymentMethod}">
@@ -41,7 +41,8 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Card Number</label>
-                        <input type="text" th:field="*{cardNumber}" class="form-control" placeholder="4532 XXXX XXXX 8900" required>
+                        <input type="text" th:field="*{cardNumber}" id="cardNumber" class="form-control" placeholder="4532 XXXX XXXX 8900" required>
+                        <div id="cardNumberError" class="invalid-feedback">Card number must contain exactly 16 digits.</div>
                         <small class="text-muted">Use any test card number. Card ending in '0000' will simulate failure.</small>
                     </div>
                     <div class="row">
@@ -60,5 +61,51 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardNumberError = document.getElementById('cardNumberError');
+    const paymentForm = document.getElementById('paymentForm');
+
+    function validateCardNumber() {
+        if (!cardNumberInput) return true;
+        const val = cardNumberInput.value;
+        const isExactly16Digits = /^\d{16}$/.test(val);
+
+        if (!isExactly16Digits) {
+            cardNumberInput.classList.add('is-invalid');
+            if (cardNumberError) {
+                cardNumberError.style.display = 'block';
+            }
+            return false;
+        } else {
+            cardNumberInput.classList.remove('is-invalid');
+            if (cardNumberError) {
+                cardNumberError.style.display = 'none';
+            }
+            return true;
+        }
+    }
+
+    if (cardNumberInput) {
+        ['input', 'keyup', 'change', 'blur'].forEach(function (eventType) {
+            cardNumberInput.addEventListener(eventType, function () {
+                validateCardNumber();
+            });
+        });
+    }
+
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function (e) {
+            if (!validateCardNumber()) {
+                e.preventDefault();
+                e.stopPropagation();
+                cardNumberInput.focus();
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>
