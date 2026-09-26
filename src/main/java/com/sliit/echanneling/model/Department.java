@@ -29,7 +29,7 @@ public class Department {
     @JoinColumn(name = "hospital_id", nullable = false)
     private Hospital hospital;
 
-    @Column(nullable = false)
+    @Column(name = "active", columnDefinition = "bit default 1")
     @Builder.Default
     private Boolean active = true;
 }

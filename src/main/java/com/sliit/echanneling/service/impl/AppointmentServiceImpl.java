@@ -48,7 +48,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String refNo = "APP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String date = request.getAppointmentDate() != null ? request.getAppointmentDate() : schedule.getScheduleDate();
         String requestedTime = request.getAppointmentTime() != null ? request.getAppointmentTime() : schedule.getStartTime();
-        String time = calculateAvailableSlotTime(schedule.getDoctor().getStaffId(), schedule, date, requestedTime);
+        String time = calculateAvailableSlotTime(schedule.getDoctor().getStaffId(), schedule, date, requestedTime, null);
         String nowStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         Appointment appointment = Appointment.builder()
@@ -69,9 +69,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-    private String calculateAvailableSlotTime(Long doctorId, DoctorSchedule schedule, String date, String requestedTime) {
+    private String calculateAvailableSlotTime(Long doctorId, DoctorSchedule schedule, String date, String requestedTime, Long excludeAppointmentId) {
         String candidateTime = requestedTime;
-        if (!appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, candidateTime)) {
+        if (!isSlotBooked(doctorId, date, candidateTime, excludeAppointmentId)) {
             return candidateTime;
         }
 
@@ -82,7 +82,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             while (!current.isAfter(endTime)) {
                 current = current.plusMinutes(15);
                 String formattedTime = current.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
-                if (!appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, formattedTime)) {
+                if (!isSlotBooked(doctorId, date, formattedTime, excludeAppointmentId)) {
                     return formattedTime;
                 }
             }
@@ -91,6 +91,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         throw new IllegalStateException("That doctor slot is already booked! Please select another schedule.");
+    }
+
+    private boolean isSlotBooked(Long doctorId, String date, String time, Long excludeAppointmentId) {
+        if (excludeAppointmentId == null) {
+            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, time);
+        } else {
+            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(doctorId, date, time, excludeAppointmentId);
+        }
     }
 
     @Override
@@ -150,7 +158,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String requestedTime = request.getAppointmentTime() != null && !request.getAppointmentTime().isBlank()
                 ? request.getAppointmentTime() : targetSchedule.getStartTime();
 
-        String slotTime = calculateAvailableSlotTime(targetSchedule.getDoctor().getStaffId(), targetSchedule, date, requestedTime);
+        String slotTime = calculateAvailableSlotTime(targetSchedule.getDoctor().getStaffId(), targetSchedule, date, requestedTime, appointmentId);
 
         appointment.setSchedule(targetSchedule);
         appointment.setDoctor(targetSchedule.getDoctor());

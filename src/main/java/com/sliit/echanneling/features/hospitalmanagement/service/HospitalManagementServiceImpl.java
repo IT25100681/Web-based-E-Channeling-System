@@ -92,6 +92,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deactivateHospital(Long id) {
         Hospital hospital = findHospital(id);
         hospital.setActive(false);
+        hospitalRepository.save(hospital);
         log("HOSPITAL", id, "DEACTIVATE", "Deactivated hospital " + hospital.getName());
     }
 
@@ -100,6 +101,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void restoreHospital(Long id) {
         Hospital hospital = findHospital(id);
         hospital.setActive(true);
+        hospitalRepository.save(hospital);
         log("HOSPITAL", id, "RESTORE", "Restored hospital " + hospital.getName());
     }
 
@@ -108,6 +110,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deleteHospital(Long id) {
         Hospital hospital = findHospital(id);
         hospital.setActive(false);
+        hospitalRepository.save(hospital);
         log("HOSPITAL", id, "SAFE_DEACTIVATE", "Hospital was safely deactivated instead of hard-deleted.");
     }
 
@@ -138,6 +141,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deactivateDepartment(Long id) {
         Department department = findDepartment(id);
         department.setActive(false);
+        departmentRepository.save(department);
         log("DEPARTMENT", id, "DEACTIVATE", "Deactivated department " + department.getName());
     }
 
@@ -146,6 +150,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void restoreDepartment(Long id) {
         Department department = findDepartment(id);
         department.setActive(true);
+        departmentRepository.save(department);
         log("DEPARTMENT", id, "RESTORE", "Restored department " + department.getName());
     }
 
@@ -154,6 +159,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deleteDepartment(Long id) {
         Department department = findDepartment(id);
         department.setActive(false);
+        departmentRepository.save(department);
         log("DEPARTMENT", id, "SAFE_DEACTIVATE", "Department was safely deactivated instead of hard-deleted.");
     }
 
@@ -184,6 +190,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deactivateSpecialization(Long id) {
         Specialization specialization = findSpecialization(id);
         specialization.setActive(false);
+        specializationRepository.save(specialization);
         log("SPECIALIZATION", id, "DEACTIVATE", "Deactivated specialization " + specialization.getName());
     }
 
@@ -192,6 +199,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void restoreSpecialization(Long id) {
         Specialization specialization = findSpecialization(id);
         specialization.setActive(true);
+        specializationRepository.save(specialization);
         log("SPECIALIZATION", id, "RESTORE", "Restored specialization " + specialization.getName());
     }
 
@@ -200,6 +208,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
     public void deleteSpecialization(Long id) {
         Specialization specialization = findSpecialization(id);
         specialization.setActive(false);
+        specializationRepository.save(specialization);
         log("SPECIALIZATION", id, "SAFE_DEACTIVATE", "Specialization was safely deactivated instead of hard-deleted.");
     }
 

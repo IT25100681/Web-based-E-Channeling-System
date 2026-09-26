@@ -20,4 +20,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countActiveBookingsBySchedule(@Param("scheduleId") Long scheduleId);
 
     boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(Long doctorId, String appointmentDate, String appointmentTime);
+    boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(Long doctorId, String appointmentDate, String appointmentTime, Long appointmentId);
 }

@@ -30,7 +30,7 @@ public class Hospital {
     @Column(name = "contact_no")
     private String contactNo;
 
-    @Column(nullable = false)
+    @Column(name = "active", columnDefinition = "bit default 1")
     @Builder.Default
     private Boolean active = true;
 }
