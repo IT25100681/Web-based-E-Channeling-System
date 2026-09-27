@@ -36,6 +36,19 @@ class PaymentRequestDTOValidationTest {
     }
 
     @Test
+    void testCardNumberWithSpaces_StrippedAndValid() {
+        PaymentRequestDTO dto = new PaymentRequestDTO();
+        dto.setAppointmentId(1L);
+        dto.setAmount(new BigDecimal("1000.00"));
+        dto.setPaymentMethod("CARD");
+        dto.setCardNumber("1234 5678 9012 3456");
+
+        assertEquals("1234567890123456", dto.getCardNumber());
+        Set<ConstraintViolation<PaymentRequestDTO>> violations = validator.validate(dto);
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
     void testCardNumberWithLetters_HasViolation() {
         PaymentRequestDTO dto = new PaymentRequestDTO();
         dto.setAppointmentId(1L);

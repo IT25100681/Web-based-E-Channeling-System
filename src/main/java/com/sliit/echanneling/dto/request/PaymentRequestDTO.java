@@ -22,4 +22,12 @@ public class PaymentRequestDTO {
     private String cardNumber;
     private String cardExpiry;
     private String cvv;
+
+    public void setCardNumber(String cardNumber) {
+        if (cardNumber != null) {
+            this.cardNumber = cardNumber.replace(" ", "").trim();
+        } else {
+            this.cardNumber = null;
+        }
+    }
 }
