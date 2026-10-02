@@ -48,7 +48,8 @@
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label">Expiry Date</label>
-                            <input type="text" th:field="*{cardExpiry}" class="form-control" placeholder="MM/YY" required>
+                            <input type="text" th:field="*{cardExpiry}" id="cardExpiry" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                            <div id="cardExpiryError" class="invalid-feedback">Expiry date is required.</div>
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">CVV</label>
@@ -60,97 +61,340 @@
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cardNumberInput = document.getElementById('cardNumber');
-    const cardNumberError = document.getElementById('cardNumberError');
-    const paymentForm = document.getElementById('paymentForm');
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cardNumberInput = document.getElementById('cardNumber');
+        const cardNumberError = document.getElementById('cardNumberError');
+        const cardExpiryInput = document.getElementById('cardExpiry');
+        const cardExpiryError = document.getElementById('cardExpiryError');
+        const paymentForm = document.getElementById('paymentForm');
 
-    // 1. Format card number into groups of 4 digits (e.g. 1234 5678 9012 3456)
-    function formatCardNumber() {
-        if (!cardNumberInput) return;
+        // ==========================================
+        // 1. CARD NUMBER LOGIC
+        // ==========================================
+        function formatCardNumber(preferredCaretPos) {
+            if (!cardNumberInput) return;
+            try {
+                let currentVal = cardNumberInput.value || '';
+                let isFocused = (document.activeElement === cardNumberInput);
+                let cursorPos = isFocused ? ((typeof preferredCaretPos === 'number') ? preferredCaretPos : cardNumberInput.selectionStart) : null;
 
-        // Keep only numbers 0-9 (remove letters and special characters)
-        let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
+                let digitsBeforeCursor = 0;
+                if (cursorPos !== null && cursorPos !== undefined) {
+                    for (let i = 0; i < Math.min(cursorPos, currentVal.length); i++) {
+                        if (/[0-9]/.test(currentVal[i])) {
+                            digitsBeforeCursor++;
+                        }
+                    }
+                }
 
-        // Reject extra digits (maximum 16 digits allowed)
-        if (rawDigits.length > 16) {
-            rawDigits = rawDigits.substring(0, 16);
+                let rawDigits = currentVal.replace(/[^0-9]/g, '');
+                if (rawDigits.length > 16) {
+                    rawDigits = rawDigits.substring(0, 16);
+                }
+
+                let formatted = '';
+                for (let i = 0; i < rawDigits.length; i++) {
+                    if (i > 0 && i % 4 === 0) {
+                        formatted += ' ';
+                    }
+                    formatted += rawDigits[i];
+                }
+
+                if (cardNumberInput.value !== formatted) {
+                    cardNumberInput.value = formatted;
+                }
+
+                if (isFocused && cursorPos !== null && cursorPos !== undefined && typeof cardNumberInput.setSelectionRange === 'function') {
+                    let newCursorPos = 0;
+                    let digitsSeen = 0;
+                    for (let i = 0; i < formatted.length; i++) {
+                        if (digitsSeen === digitsBeforeCursor) {
+                            if (formatted[i] === ' ') {
+                                newCursorPos = i + 1;
+                            } else {
+                                newCursorPos = i;
+                            }
+                            break;
+                        }
+                        if (/[0-9]/.test(formatted[i])) {
+                            digitsSeen++;
+                        }
+                        newCursorPos = i + 1;
+                    }
+                    try {
+                        cardNumberInput.setSelectionRange(newCursorPos, newCursorPos);
+                    } catch (e) {}
+                }
+            } catch (err) {
+                console.error('Error formatting card number:', err);
+            }
         }
 
-        // Add a space after every 4 digits for display
-        let formatted = '';
-        for (let i = 0; i < rawDigits.length; i++) {
-            if (i > 0 && i % 4 === 0) {
-                formatted += ' ';
+        function validateCardNumber() {
+            if (!cardNumberInput) return true;
+            let rawDigits = (cardNumberInput.value || '').replace(/[^0-9]/g, '');
+            if (rawDigits.length !== 16) {
+                cardNumberInput.classList.add('is-invalid');
+                if (cardNumberError) {
+                    cardNumberError.style.display = 'block';
+                }
+                return false;
+            } else {
+                cardNumberInput.classList.remove('is-invalid');
+                if (cardNumberError) {
+                    cardNumberError.style.display = 'none';
+                }
+                return true;
             }
-            formatted += rawDigits[i];
         }
 
-        cardNumberInput.value = formatted;
-    }
+        if (cardNumberInput) {
+            formatCardNumber();
 
-    // 2. Validate that card number has exactly 16 digits
-    function validateCardNumber() {
-        if (!cardNumberInput) return true;
+            cardNumberInput.addEventListener('keydown', function (e) {
+                const allowedKeys = [
+                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+                    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                    'Home', 'End'
+                ];
 
-        // Get raw digits without spaces
-        let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
+                if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
+                    if (e.key === 'Backspace' && cardNumberInput.selectionStart === cardNumberInput.selectionEnd) {
+                        const pos = cardNumberInput.selectionStart;
+                        if (pos > 1 && cardNumberInput.value[pos - 1] === ' ') {
+                            e.preventDefault();
+                            let val = cardNumberInput.value;
+                            cardNumberInput.value = val.substring(0, pos - 2) + val.substring(pos);
+                            formatCardNumber(pos - 2);
+                            let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
+                            if (cardNumberInput.classList.contains('is-invalid') || rawDigits.length === 16) {
+                                validateCardNumber();
+                            }
+                            return;
+                        }
+                    }
+                    if (e.key === 'Delete' && cardNumberInput.selectionStart === cardNumberInput.selectionEnd) {
+                        const pos = cardNumberInput.selectionStart;
+                        if (pos < cardNumberInput.value.length && cardNumberInput.value[pos] === ' ') {
+                            e.preventDefault();
+                            let val = cardNumberInput.value;
+                            cardNumberInput.value = val.substring(0, pos) + val.substring(pos + 2);
+                            formatCardNumber(pos);
+                            let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
+                            if (cardNumberInput.classList.contains('is-invalid') || rawDigits.length === 16) {
+                                validateCardNumber();
+                            }
+                            return;
+                        }
+                    }
+                    return;
+                }
 
-        if (rawDigits.length !== 16) {
-            cardNumberInput.classList.add('is-invalid');
-            if (cardNumberError) {
-                cardNumberError.style.display = 'block';
+                if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                    return;
+                }
+
+                let rawDigits = (cardNumberInput.value || '').replace(/[^0-9]/g, '');
+                if (rawDigits.length >= 16 && cardNumberInput.selectionStart === cardNumberInput.selectionEnd) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+
+            cardNumberInput.addEventListener('input', function () {
+                formatCardNumber();
+                let rawDigits = (cardNumberInput.value || '').replace(/[^0-9]/g, '');
+                if (cardNumberInput.classList.contains('is-invalid') || rawDigits.length === 16) {
+                    validateCardNumber();
+                }
+            });
+
+            cardNumberInput.addEventListener('blur', function () {
+                formatCardNumber();
+                validateCardNumber();
+            });
+        }
+
+        // ==========================================
+        // 2. CARD EXPIRY LOGIC (MM/YY)
+        // ==========================================
+        function formatCardExpiry(preferredCaretPos) {
+            if (!cardExpiryInput) return;
+            try {
+                let currentVal = cardExpiryInput.value || '';
+                let isFocused = (document.activeElement === cardExpiryInput);
+                let cursorPos = isFocused ? ((typeof preferredCaretPos === 'number') ? preferredCaretPos : cardExpiryInput.selectionStart) : null;
+
+                // Remove non-digit characters and limit to 4 digits (MMYY)
+                let digits = currentVal.replace(/[^0-9]/g, '').substring(0, 4);
+
+                let formatted = '';
+                if (digits.length >= 2) {
+                    formatted = digits.substring(0, 2) + '/' + digits.substring(2);
+                } else {
+                    formatted = digits;
+                }
+
+                if (cardExpiryInput.value !== formatted) {
+                    cardExpiryInput.value = formatted;
+                }
+
+                if (isFocused && cursorPos !== null && cursorPos !== undefined && typeof cardExpiryInput.setSelectionRange === 'function') {
+                    let newPos = cursorPos;
+                    if (digits.length === 2 && currentVal.length === 2 && formatted.length === 3) {
+                        newPos = 3;
+                    }
+                    try {
+                        cardExpiryInput.setSelectionRange(newPos, newPos);
+                    } catch (e) {}
+                }
+            } catch (err) {
+                console.error('Error formatting card expiry:', err);
             }
-            return false;
-        } else {
-            cardNumberInput.classList.remove('is-invalid');
-            if (cardNumberError) {
-                cardNumberError.style.display = 'none';
+        }
+
+        function validateCardExpiry() {
+            if (!cardExpiryInput) return true;
+
+            let val = (cardExpiryInput.value || '').trim();
+
+            // 1. Required field validation
+            if (val === '') {
+                cardExpiryInput.classList.add('is-invalid');
+                if (cardExpiryError) {
+                    cardExpiryError.textContent = 'Expiry date is required.';
+                    cardExpiryError.style.display = 'block';
+                }
+                return false;
+            }
+
+            // 2. Format validation (MM/YY)
+            if (val.length !== 5 || val.charAt(2) !== '/') {
+                cardExpiryInput.classList.add('is-invalid');
+                if (cardExpiryError) {
+                    cardExpiryError.textContent = 'Invalid expiry date format (MM/YY).';
+                    cardExpiryError.style.display = 'block';
+                }
+                return false;
+            }
+
+            // Extract month and year
+            let month = parseInt(val.substring(0, 2), 10);
+            let year = parseInt(val.substring(3, 5), 10);
+
+            // 3. Month validation (01 to 12)
+            if (isNaN(month) || month < 1 || month > 12) {
+                cardExpiryInput.classList.add('is-invalid');
+                if (cardExpiryError) {
+                    cardExpiryError.textContent = 'Month must be between 01 and 12.';
+                    cardExpiryError.style.display = 'block';
+                }
+                return false;
+            }
+
+            // 4. Date validation (compare with current month and year)
+            let now = new Date();
+            let currentYearYY = now.getFullYear() % 100; // e.g. 2026 -> 26
+            let currentMonth = now.getMonth() + 1;       // 1 to 12
+
+            if (isNaN(year) || year < currentYearYY || (year === currentYearYY && month < currentMonth)) {
+                cardExpiryInput.classList.add('is-invalid');
+                if (cardExpiryError) {
+                    cardExpiryError.textContent = 'Card has expired.';
+                    cardExpiryError.style.display = 'block';
+                }
+                return false;
+            }
+
+            // Valid expiry date!
+            cardExpiryInput.classList.remove('is-invalid');
+            if (cardExpiryError) {
+                cardExpiryError.style.display = 'none';
             }
             return true;
         }
-    }
 
-    if (cardNumberInput) {
-        // Format pre-filled input on page load if needed
-        formatCardNumber();
+        if (cardExpiryInput) {
+            formatCardExpiry();
 
-        // Format and validate automatically while typing or pasting
-        cardNumberInput.addEventListener('input', function () {
-            formatCardNumber();
-            let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
-            if (cardNumberInput.classList.contains('is-invalid') || rawDigits.length === 16) {
-                validateCardNumber();
-            }
-        });
+            cardExpiryInput.addEventListener('keydown', function (e) {
+                const allowedKeys = [
+                    'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+                    'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                    'Home', 'End'
+                ];
 
-        // Validate when user leaves the field (blur)
-        cardNumberInput.addEventListener('blur', function () {
-            formatCardNumber();
-            validateCardNumber();
-        });
-    }
+                if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
+                    if (e.key === 'Backspace' && cardExpiryInput.selectionStart === 3 && cardExpiryInput.selectionEnd === 3) {
+                        e.preventDefault();
+                        let val = cardExpiryInput.value;
+                        cardExpiryInput.value = val.substring(0, 1);
+                        formatCardExpiry();
+                        if (cardExpiryInput.classList.contains('is-invalid')) {
+                            validateCardExpiry();
+                        }
+                        return;
+                    }
+                    return;
+                }
 
-    // 3. Handle form submission
-    if (paymentForm) {
-        paymentForm.addEventListener('submit', function (e) {
-            formatCardNumber();
+                if (!/^[0-9]$/.test(e.key)) {
+                    e.preventDefault();
+                    return;
+                }
 
-            if (!validateCardNumber()) {
-                e.preventDefault();
-                e.stopPropagation();
-                cardNumberInput.focus();
-            } else {
-                // Remove spaces before sending to backend/database so only 16 digits are sent
-                let rawDigits = cardNumberInput.value.replace(/[^0-9]/g, '');
-                cardNumberInput.value = rawDigits;
-            }
-        });
-    }
-});
-</script>
+                let rawDigits = (cardExpiryInput.value || '').replace(/[^0-9]/g, '');
+                if (rawDigits.length >= 4 && cardExpiryInput.selectionStart === cardExpiryInput.selectionEnd) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+
+            cardExpiryInput.addEventListener('input', function () {
+                formatCardExpiry();
+                let val = cardExpiryInput.value;
+                if (cardExpiryInput.classList.contains('is-invalid') || val.length === 5) {
+                    validateCardExpiry();
+                }
+            });
+
+            cardExpiryInput.addEventListener('blur', function () {
+                formatCardExpiry();
+                validateCardExpiry();
+            });
+        }
+
+        // ==========================================
+        // 3. FORM SUBMISSION LOGIC
+        // ==========================================
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function (e) {
+                formatCardNumber();
+                formatCardExpiry();
+
+                let isCardValid = validateCardNumber();
+                let isExpiryValid = validateCardExpiry();
+
+                if (!isCardValid || !isExpiryValid) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (!isCardValid) {
+                        cardNumberInput.focus();
+                    } else if (!isExpiryValid) {
+                        cardExpiryInput.focus();
+                    }
+                } else {
+                    let rawDigits = (cardNumberInput.value || '').replace(/[^0-9]/g, '');
+                    cardNumberInput.value = rawDigits;
+                }
+            });
+        }
+    });
+    </script>
+</div>
 </body>
 </html>
