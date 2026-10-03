@@ -11,7 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -53,5 +56,18 @@ public class DoctorDashboardController {
         model.addAttribute("schedules", docId != null ? scheduleService.getSchedulesByDoctor(docId) : List.of());
         model.addAttribute("appointments", docId != null ? appointmentService.getAppointmentsByDoctor(docId) : List.of());
         return "doctor/dashboard";
+    }
+
+    @PostMapping("/appointments/{id}/cancel")
+    public String cancelAppointment(@PathVariable("id") Long id,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            appointmentService.cancelAppointmentByDoctor(id, authentication.getName());
+            redirectAttributes.addFlashAttribute("infoMessage", "Appointment cancelled successfully!");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctor/dashboard";
     }
 }

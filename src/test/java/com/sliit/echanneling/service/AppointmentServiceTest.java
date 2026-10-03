@@ -7,12 +7,15 @@ import com.sliit.echanneling.model.Appointment;
 import com.sliit.echanneling.model.Doctor;
 import com.sliit.echanneling.model.DoctorSchedule;
 import com.sliit.echanneling.model.Patient;
-
+import com.sliit.echanneling.model.UserAccount;
 import com.sliit.echanneling.model.enums.AppointmentStatus;
+import com.sliit.echanneling.model.enums.Role;
 import com.sliit.echanneling.repository.AppointmentRepository;
+import com.sliit.echanneling.repository.DoctorRepository;
 import com.sliit.echanneling.repository.DoctorScheduleRepository;
 import com.sliit.echanneling.repository.PatientRepository;
 import com.sliit.echanneling.repository.PaymentRepository;
+import com.sliit.echanneling.repository.UserAccountRepository;
 import com.sliit.echanneling.service.impl.AppointmentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,15 +45,22 @@ class AppointmentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
 
+    @Mock
+    private UserAccountRepository userAccountRepository;
+
+    @Mock
+    private DoctorRepository doctorRepository;
+
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
 
     private DoctorSchedule schedule;
     private Patient patient;
+    private Doctor doctor;
 
     @BeforeEach
     void setUp() {
-        Doctor doctor = new Doctor();
+        doctor = new Doctor();
         doctor.setStaffId(5L);
         doctor.setName("Dr. Smith");
         doctor.setSpecialization("Cardiology");
@@ -165,5 +175,113 @@ class AppointmentServiceTest {
 
         assertThrows(IllegalStateException.class, () -> appointmentService.rescheduleAppointment(100L, request, "testuser"));
         verify(appointmentRepository, never()).save(any());
+    }
+
+    @Test
+    void testCancelAppointmentByDoctor_Success() {
+        Appointment appointment = Appointment.builder()
+                .appointmentId(200L)
+                .patient(patient)
+                .doctor(doctor)
+                .schedule(schedule)
+                .status(AppointmentStatus.CONFIRMED)
+                .build();
+
+        UserAccount docAccount = UserAccount.builder()
+                .username("drsmith")
+                .role(Role.DOCTOR)
+                .staff(doctor)
+                .build();
+
+        when(appointmentRepository.findById(200L)).thenReturn(Optional.of(appointment));
+        when(userAccountRepository.findByUsername("drsmith")).thenReturn(Optional.of(docAccount));
+
+        appointmentService.cancelAppointmentByDoctor(200L, "drsmith");
+
+        assertEquals(AppointmentStatus.CANCELLED, appointment.getStatus());
+        verify(appointmentRepository, times(1)).save(appointment);
+    }
+
+    @Test
+    void testCancelAppointmentByDoctor_UnauthorizedDoctor_ThrowsException() {
+        Doctor otherDoctor = new Doctor();
+        otherDoctor.setStaffId(99L);
+        otherDoctor.setName("Dr. Other");
+
+        Appointment appointment = Appointment.builder()
+                .appointmentId(200L)
+                .patient(patient)
+                .doctor(doctor) // Doctor ID is 5L
+                .schedule(schedule)
+                .status(AppointmentStatus.CONFIRMED)
+                .build();
+
+        UserAccount otherDocAccount = UserAccount.builder()
+                .username("drother")
+                .role(Role.DOCTOR)
+                .staff(otherDoctor) // Doctor ID is 99L
+                .build();
+
+        when(appointmentRepository.findById(200L)).thenReturn(Optional.of(appointment));
+        when(userAccountRepository.findByUsername("drother")).thenReturn(Optional.of(otherDocAccount));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                appointmentService.cancelAppointmentByDoctor(200L, "drother"));
+
+        assertTrue(ex.getMessage().contains("not authorized"));
+        assertEquals(AppointmentStatus.CONFIRMED, appointment.getStatus());
+        verify(appointmentRepository, never()).save(appointment);
+    }
+
+    @Test
+    void testCancelAppointmentByDoctor_AlreadyCompleted_ThrowsException() {
+        Appointment appointment = Appointment.builder()
+                .appointmentId(200L)
+                .patient(patient)
+                .doctor(doctor)
+                .schedule(schedule)
+                .status(AppointmentStatus.COMPLETED)
+                .build();
+
+        UserAccount docAccount = UserAccount.builder()
+                .username("drsmith")
+                .role(Role.DOCTOR)
+                .staff(doctor)
+                .build();
+
+        when(appointmentRepository.findById(200L)).thenReturn(Optional.of(appointment));
+        when(userAccountRepository.findByUsername("drsmith")).thenReturn(Optional.of(docAccount));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                appointmentService.cancelAppointmentByDoctor(200L, "drsmith"));
+
+        assertTrue(ex.getMessage().contains("already completed"));
+        verify(appointmentRepository, never()).save(appointment);
+    }
+
+    @Test
+    void testCancelAppointmentByDoctor_AlreadyCancelled_ThrowsException() {
+        Appointment appointment = Appointment.builder()
+                .appointmentId(200L)
+                .patient(patient)
+                .doctor(doctor)
+                .schedule(schedule)
+                .status(AppointmentStatus.CANCELLED)
+                .build();
+
+        UserAccount docAccount = UserAccount.builder()
+                .username("drsmith")
+                .role(Role.DOCTOR)
+                .staff(doctor)
+                .build();
+
+        when(appointmentRepository.findById(200L)).thenReturn(Optional.of(appointment));
+        when(userAccountRepository.findByUsername("drsmith")).thenReturn(Optional.of(docAccount));
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                appointmentService.cancelAppointmentByDoctor(200L, "drsmith"));
+
+        assertTrue(ex.getMessage().contains("already cancelled"));
+        verify(appointmentRepository, never()).save(appointment);
     }
 }

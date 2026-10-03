@@ -4,13 +4,18 @@ import com.sliit.echanneling.dto.request.BookingRequestDTO;
 import com.sliit.echanneling.dto.request.RescheduleRequestDTO;
 import com.sliit.echanneling.dto.response.AppointmentViewDTO;
 import com.sliit.echanneling.model.Appointment;
+import com.sliit.echanneling.model.Doctor;
 import com.sliit.echanneling.model.DoctorSchedule;
 import com.sliit.echanneling.model.Patient;
+import com.sliit.echanneling.model.UserAccount;
 import com.sliit.echanneling.model.enums.AppointmentStatus;
+import com.sliit.echanneling.model.enums.Role;
 import com.sliit.echanneling.repository.AppointmentRepository;
+import com.sliit.echanneling.repository.DoctorRepository;
 import com.sliit.echanneling.repository.DoctorScheduleRepository;
 import com.sliit.echanneling.repository.PatientRepository;
 import com.sliit.echanneling.repository.PaymentRepository;
+import com.sliit.echanneling.repository.UserAccountRepository;
 import com.sliit.echanneling.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +35,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorScheduleRepository scheduleRepository;
     private final PatientRepository patientRepository;
     private final PaymentRepository paymentRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final DoctorRepository doctorRepository;
 
     @Override
     @Transactional
@@ -95,9 +102,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private boolean isSlotBooked(Long doctorId, String date, String time, Long excludeAppointmentId) {
         if (excludeAppointmentId == null) {
-            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(doctorId, date, time);
+            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndStatusNot(doctorId, date, time, AppointmentStatus.CANCELLED);
         } else {
-            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(doctorId, date, time, excludeAppointmentId);
+            return appointmentRepository.existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNotAndStatusNot(doctorId, date, time, excludeAppointmentId, AppointmentStatus.CANCELLED);
         }
     }
 
@@ -174,6 +181,55 @@ public class AppointmentServiceImpl implements AppointmentService {
     public void cancelAppointment(Long appointmentId, String username) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot cancel an appointment that is already completed.");
+        }
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new IllegalStateException("Appointment is already cancelled.");
+        }
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointmentRepository.save(appointment);
+    }
+
+    @Override
+    @Transactional
+    public void cancelAppointmentByDoctor(Long appointmentId, String doctorUsername) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found: " + appointmentId));
+
+        UserAccount account = userAccountRepository.findByUsername(doctorUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User account not found: " + doctorUsername));
+
+        Long doctorId = null;
+        if (account.getStaff() != null) {
+            doctorId = account.getStaff().getStaffId();
+        }
+
+        if (doctorId == null) {
+            Doctor doc = doctorRepository.findAll().stream()
+                    .filter(d -> d.getEmail() != null && d.getEmail().equalsIgnoreCase(doctorUsername))
+                    .findFirst()
+                    .orElse(null);
+            if (doc != null) {
+                doctorId = doc.getStaffId();
+            }
+        }
+
+        // Verify authorization: Doctor can only cancel appointments assigned to that doctor (admins allowed)
+        if (account.getRole() != Role.ADMIN) {
+            if (doctorId == null || appointment.getDoctor() == null || !doctorId.equals(appointment.getDoctor().getStaffId())) {
+                throw new IllegalStateException("You are not authorized to cancel an appointment assigned to another doctor.");
+            }
+        }
+
+        // Validation: Do not allow cancellation of completed or already cancelled appointments
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new IllegalStateException("Cannot cancel an appointment that is already completed.");
+        }
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            throw new IllegalStateException("Appointment is already cancelled.");
+        }
+
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
     }
