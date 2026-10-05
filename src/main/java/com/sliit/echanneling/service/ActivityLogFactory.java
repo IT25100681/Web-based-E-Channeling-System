@@ -1,16 +1,12 @@
-package com.sliit.echanneling.features.hospitalmanagement.service;
+package com.sliit.echanneling.service;
 
-import com.sliit.echanneling.features.hospitalmanagement.model.HospitalManagementActivityLog;
+import com.sliit.echanneling.model.HospitalManagementActivityLog;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-/**
- * Factory Pattern: centralizes construction of operation log entries so create,
- * update, deactivate, backup, and recovery events have consistent metadata.
- */
 @Component
 public class ActivityLogFactory {
 

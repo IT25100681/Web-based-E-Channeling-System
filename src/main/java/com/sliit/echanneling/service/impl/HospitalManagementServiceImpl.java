@@ -1,21 +1,24 @@
-package com.sliit.echanneling.features.hospitalmanagement.service;
+package com.sliit.echanneling.service.impl;
 
-import com.sliit.echanneling.features.hospitalmanagement.dto.DepartmentForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.HospitalForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SpecializationForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SystemSettingForm;
-import com.sliit.echanneling.features.hospitalmanagement.exception.HospitalManagementException;
-import com.sliit.echanneling.features.hospitalmanagement.model.HospitalManagementActivityLog;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementActivityLogRepository;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementDepartmentRepository;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementHospitalRepository;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementSpecializationRepository;
-import com.sliit.echanneling.features.hospitalmanagement.util.InputSanitizer;
+import com.sliit.echanneling.dto.DepartmentForm;
+import com.sliit.echanneling.dto.HospitalForm;
+import com.sliit.echanneling.dto.SpecializationForm;
+import com.sliit.echanneling.dto.SystemSettingForm;
+import com.sliit.echanneling.exception.HospitalManagementException;
 import com.sliit.echanneling.model.Department;
 import com.sliit.echanneling.model.Hospital;
+import com.sliit.echanneling.model.HospitalManagementActivityLog;
 import com.sliit.echanneling.model.Specialization;
 import com.sliit.echanneling.model.SystemSetting;
 import com.sliit.echanneling.model.embedded.Address;
+import com.sliit.echanneling.repository.HospitalManagementActivityLogRepository;
+import com.sliit.echanneling.repository.HospitalManagementDepartmentRepository;
+import com.sliit.echanneling.repository.HospitalManagementHospitalRepository;
+import com.sliit.echanneling.repository.HospitalManagementSpecializationRepository;
+import com.sliit.echanneling.service.ActivityLogFactory;
+import com.sliit.echanneling.service.HospitalManagementService;
+import com.sliit.echanneling.service.HospitalManagementSettings;
+import com.sliit.echanneling.util.InputSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,29 +92,10 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
 
     @Override
     @Transactional
-    public void deactivateHospital(Long id) {
-        Hospital hospital = findHospital(id);
-        hospital.setActive(false);
-        hospitalRepository.save(hospital);
-        log("HOSPITAL", id, "DEACTIVATE", "Deactivated hospital " + hospital.getName());
-    }
-
-    @Override
-    @Transactional
-    public void restoreHospital(Long id) {
-        Hospital hospital = findHospital(id);
-        hospital.setActive(true);
-        hospitalRepository.save(hospital);
-        log("HOSPITAL", id, "RESTORE", "Restored hospital " + hospital.getName());
-    }
-
-    @Override
-    @Transactional
     public void deleteHospital(Long id) {
         Hospital hospital = findHospital(id);
-        hospital.setActive(false);
-        hospitalRepository.save(hospital);
-        log("HOSPITAL", id, "SAFE_DEACTIVATE", "Hospital was safely deactivated instead of hard-deleted.");
+        hospitalRepository.delete(hospital);
+        log("HOSPITAL", id, "DELETE", "Deleted hospital " + hospital.getName());
     }
 
     @Override
@@ -138,29 +122,10 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
 
     @Override
     @Transactional
-    public void deactivateDepartment(Long id) {
-        Department department = findDepartment(id);
-        department.setActive(false);
-        departmentRepository.save(department);
-        log("DEPARTMENT", id, "DEACTIVATE", "Deactivated department " + department.getName());
-    }
-
-    @Override
-    @Transactional
-    public void restoreDepartment(Long id) {
-        Department department = findDepartment(id);
-        department.setActive(true);
-        departmentRepository.save(department);
-        log("DEPARTMENT", id, "RESTORE", "Restored department " + department.getName());
-    }
-
-    @Override
-    @Transactional
     public void deleteDepartment(Long id) {
         Department department = findDepartment(id);
-        department.setActive(false);
-        departmentRepository.save(department);
-        log("DEPARTMENT", id, "SAFE_DEACTIVATE", "Department was safely deactivated instead of hard-deleted.");
+        departmentRepository.delete(department);
+        log("DEPARTMENT", id, "DELETE", "Deleted department " + department.getName());
     }
 
     @Override
@@ -187,29 +152,10 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
 
     @Override
     @Transactional
-    public void deactivateSpecialization(Long id) {
-        Specialization specialization = findSpecialization(id);
-        specialization.setActive(false);
-        specializationRepository.save(specialization);
-        log("SPECIALIZATION", id, "DEACTIVATE", "Deactivated specialization " + specialization.getName());
-    }
-
-    @Override
-    @Transactional
-    public void restoreSpecialization(Long id) {
-        Specialization specialization = findSpecialization(id);
-        specialization.setActive(true);
-        specializationRepository.save(specialization);
-        log("SPECIALIZATION", id, "RESTORE", "Restored specialization " + specialization.getName());
-    }
-
-    @Override
-    @Transactional
     public void deleteSpecialization(Long id) {
         Specialization specialization = findSpecialization(id);
-        specialization.setActive(false);
-        specializationRepository.save(specialization);
-        log("SPECIALIZATION", id, "SAFE_DEACTIVATE", "Specialization was safely deactivated instead of hard-deleted.");
+        specializationRepository.delete(specialization);
+        log("SPECIALIZATION", id, "DELETE", "Deleted specialization " + specialization.getName());
     }
 
     @Override
@@ -244,7 +190,7 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
                 sanitizer.cleanNullable(form.getCity()),
                 sanitizer.cleanNullable(form.getPostalCode())
         ));
-        hospital.setActive(Boolean.TRUE.equals(form.getActive()));
+        hospital.setActive(true);
     }
 
     private void applyDepartmentForm(Department department, DepartmentForm form) {
@@ -252,14 +198,14 @@ public class HospitalManagementServiceImpl implements HospitalManagementService 
         department.setName(sanitizer.clean(form.getName()));
         department.setDescription(sanitizer.cleanNullable(form.getDescription()));
         department.setHospital(findHospital(form.getHospitalId()));
-        department.setActive(Boolean.TRUE.equals(form.getActive()));
+        department.setActive(true);
     }
 
     private void applySpecializationForm(Specialization specialization, SpecializationForm form) {
         specialization.setCode(sanitizer.clean(form.getCode()).toUpperCase());
         specialization.setName(sanitizer.clean(form.getName()));
         specialization.setDescription(sanitizer.cleanNullable(form.getDescription()));
-        specialization.setActive(Boolean.TRUE.equals(form.getActive()));
+        specialization.setActive(true);
     }
 
     private Hospital findHospital(Long id) {

@@ -1,4 +1,4 @@
-package com.sliit.echanneling.features.hospitalmanagement.repository;
+package com.sliit.echanneling.repository;
 
 import com.sliit.echanneling.model.Department;
 import org.springframework.data.domain.Page;
@@ -10,10 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-/**
- * Repository Pattern: this interface provides a focused persistence boundary for
- * Department management queries.
- */
 public interface HospitalManagementDepartmentRepository extends JpaRepository<Department, Long> {
     List<Department> findAllByOrderByNameAsc();
     boolean existsByCodeIgnoreCase(String code);

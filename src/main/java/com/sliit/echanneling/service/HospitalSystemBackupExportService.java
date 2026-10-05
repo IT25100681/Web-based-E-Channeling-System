@@ -1,14 +1,14 @@
-package com.sliit.echanneling.features.hospitalmanagement.service;
+package com.sliit.echanneling.service;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementDepartmentRepository;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementHospitalRepository;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementSpecializationRepository;
 import com.sliit.echanneling.model.Department;
 import com.sliit.echanneling.model.Hospital;
 import com.sliit.echanneling.model.Specialization;
 import com.sliit.echanneling.model.SystemSetting;
+import com.sliit.echanneling.repository.HospitalManagementDepartmentRepository;
+import com.sliit.echanneling.repository.HospitalManagementHospitalRepository;
+import com.sliit.echanneling.repository.HospitalManagementSpecializationRepository;
 import com.sliit.echanneling.repository.SystemSettingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,10 +38,6 @@ public class HospitalSystemBackupExportService {
         return "hospital_system_backup_" + timestamp + ".json";
     }
 
-    /**
-     * Repository Pattern + streaming export: reads each repository in pages and
-     * writes JSON directly to the response stream to avoid a large in-memory buffer.
-     */
     @Transactional(readOnly = true)
     public void writeBackup(OutputStream outputStream) throws IOException {
         try (JsonGenerator json = objectMapper.getFactory().createGenerator(outputStream)) {

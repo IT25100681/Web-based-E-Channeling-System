@@ -1,11 +1,11 @@
-package com.sliit.echanneling.features.hospitalmanagement.controller;
+package com.sliit.echanneling.controller;
 
-import com.sliit.echanneling.features.hospitalmanagement.dto.DepartmentForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.HospitalForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SpecializationForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SystemSettingForm;
-import com.sliit.echanneling.features.hospitalmanagement.exception.HospitalManagementException;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementService;
+import com.sliit.echanneling.dto.DepartmentForm;
+import com.sliit.echanneling.dto.HospitalForm;
+import com.sliit.echanneling.dto.SpecializationForm;
+import com.sliit.echanneling.dto.SystemSettingForm;
+import com.sliit.echanneling.exception.HospitalManagementException;
+import com.sliit.echanneling.service.HospitalManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -31,7 +31,7 @@ public class HospitalManagementController {
         model.addAttribute("specializations", hospitalManagementService.getSpecializations(q));
         model.addAttribute("settings", hospitalManagementService.getSettings());
         model.addAttribute("activityLogs", hospitalManagementService.getRecentLogs());
-        return "features/hospital-management/index";
+        return "admin/hospital-management";
     }
 
     @PostMapping("/hospitals")
@@ -57,19 +57,9 @@ public class HospitalManagementController {
         return runWrite(() -> hospitalManagementService.updateHospital(id, form), redirectAttributes, "Hospital updated.", "hospitals");
     }
 
-    @PostMapping("/hospitals/{id}/deactivate")
-    public String deactivateHospital(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deactivateHospital(id), redirectAttributes, "Hospital deactivated.", "hospitals");
-    }
-
-    @PostMapping("/hospitals/{id}/restore")
-    public String restoreHospital(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.restoreHospital(id), redirectAttributes, "Hospital restored.", "hospitals");
-    }
-
     @PostMapping("/hospitals/{id}/delete")
     public String deleteHospital(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deleteHospital(id), redirectAttributes, "Hospital safely deactivated.", "hospitals");
+        return runWrite(() -> hospitalManagementService.deleteHospital(id), redirectAttributes, "Hospital deleted.", "hospitals");
     }
 
     @PostMapping("/departments")
@@ -95,19 +85,9 @@ public class HospitalManagementController {
         return runWrite(() -> hospitalManagementService.updateDepartment(id, form), redirectAttributes, "Department updated.", "departments");
     }
 
-    @PostMapping("/departments/{id}/deactivate")
-    public String deactivateDepartment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deactivateDepartment(id), redirectAttributes, "Department deactivated.", "departments");
-    }
-
-    @PostMapping("/departments/{id}/restore")
-    public String restoreDepartment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.restoreDepartment(id), redirectAttributes, "Department restored.", "departments");
-    }
-
     @PostMapping("/departments/{id}/delete")
     public String deleteDepartment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deleteDepartment(id), redirectAttributes, "Department safely deactivated.", "departments");
+        return runWrite(() -> hospitalManagementService.deleteDepartment(id), redirectAttributes, "Department deleted.", "departments");
     }
 
     @PostMapping("/specializations")
@@ -133,19 +113,9 @@ public class HospitalManagementController {
         return runWrite(() -> hospitalManagementService.updateSpecialization(id, form), redirectAttributes, "Specialization updated.", "specializations");
     }
 
-    @PostMapping("/specializations/{id}/deactivate")
-    public String deactivateSpecialization(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deactivateSpecialization(id), redirectAttributes, "Specialization deactivated.", "specializations");
-    }
-
-    @PostMapping("/specializations/{id}/restore")
-    public String restoreSpecialization(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.restoreSpecialization(id), redirectAttributes, "Specialization restored.", "specializations");
-    }
-
     @PostMapping("/specializations/{id}/delete")
     public String deleteSpecialization(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return runWrite(() -> hospitalManagementService.deleteSpecialization(id), redirectAttributes, "Specialization safely deactivated.", "specializations");
+        return runWrite(() -> hospitalManagementService.deleteSpecialization(id), redirectAttributes, "Specialization deleted.", "specializations");
     }
 
     @PostMapping("/settings")

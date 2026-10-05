@@ -4,12 +4,12 @@ import com.sliit.echanneling.dto.request.BookingRequestDTO;
 import com.sliit.echanneling.dto.request.ComplaintRequestDTO;
 import com.sliit.echanneling.dto.request.RescheduleRequestDTO;
 import com.sliit.echanneling.dto.response.AppointmentViewDTO;
-import com.sliit.echanneling.features.hospitalmanagement.dto.DepartmentForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.HospitalForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SpecializationForm;
-import com.sliit.echanneling.features.hospitalmanagement.dto.SystemSettingForm;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementService;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementSettings;
+import com.sliit.echanneling.dto.DepartmentForm;
+import com.sliit.echanneling.dto.HospitalForm;
+import com.sliit.echanneling.dto.SpecializationForm;
+import com.sliit.echanneling.dto.SystemSettingForm;
+import com.sliit.echanneling.service.HospitalManagementService;
+import com.sliit.echanneling.service.HospitalManagementSettings;
 import com.sliit.echanneling.model.*;
 import com.sliit.echanneling.model.enums.AppointmentStatus;
 import com.sliit.echanneling.model.enums.ComplaintStatus;
@@ -104,22 +104,18 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    void testHospitalDeactivateAndRestore() {
+    void testHospitalDelete() {
         HospitalForm createForm = new HospitalForm();
         createForm.setCode("HOSP-TEST-2");
-        createForm.setName("Test Hospital Deactivate");
+        createForm.setName("Test Hospital Delete");
         createForm.setActive(true);
 
         Hospital created = hospitalManagementService.createHospital(createForm);
         Long id = created.getHospitalId();
 
-        hospitalManagementService.deactivateHospital(id);
-        Hospital deactivated = hospitalRepository.findById(id).orElseThrow();
-        assertFalse(deactivated.getActive(), "Hospital should be deactivated in DB");
+        hospitalManagementService.deleteHospital(id);
 
-        hospitalManagementService.restoreHospital(id);
-        Hospital restored = hospitalRepository.findById(id).orElseThrow();
-        assertTrue(restored.getActive(), "Hospital should be active after restore in DB");
+        assertFalse(hospitalRepository.findById(id).isPresent(), "Hospital should be deleted from DB");
     }
 
     @Test
@@ -150,25 +146,21 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    void testDepartmentDeactivateAndRestore() {
+    void testDepartmentDelete() {
         Hospital hospital = hospitalRepository.findAll().get(0);
 
         DepartmentForm createForm = new DepartmentForm();
         createForm.setCode("DEPT-TEST-2");
-        createForm.setName("Test Department Deactivate");
+        createForm.setName("Test Department Delete");
         createForm.setHospitalId(hospital.getHospitalId());
         createForm.setActive(true);
 
         Department created = hospitalManagementService.createDepartment(createForm);
         Long id = created.getDepartmentId();
 
-        hospitalManagementService.deactivateDepartment(id);
-        Department deactivated = departmentRepository.findById(id).orElseThrow();
-        assertFalse(deactivated.getActive(), "Department should be deactivated in DB");
+        hospitalManagementService.deleteDepartment(id);
 
-        hospitalManagementService.restoreDepartment(id);
-        Department restored = departmentRepository.findById(id).orElseThrow();
-        assertTrue(restored.getActive(), "Department should be active after restore in DB");
+        assertFalse(departmentRepository.findById(id).isPresent(), "Department should be deleted from DB");
     }
 
     @Test
@@ -195,22 +187,18 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    void testSpecializationDeactivateAndRestore() {
+    void testSpecializationDelete() {
         SpecializationForm createForm = new SpecializationForm();
         createForm.setCode("SPEC-TEST-2");
-        createForm.setName("Test Spec Deactivate");
+        createForm.setName("Test Spec Delete");
         createForm.setActive(true);
 
         Specialization created = hospitalManagementService.createSpecialization(createForm);
         Long id = created.getSpecializationId();
 
-        hospitalManagementService.deactivateSpecialization(id);
-        Specialization deactivated = specializationRepository.findById(id).orElseThrow();
-        assertFalse(deactivated.getActive(), "Specialization should be deactivated in DB");
+        hospitalManagementService.deleteSpecialization(id);
 
-        hospitalManagementService.restoreSpecialization(id);
-        Specialization restored = specializationRepository.findById(id).orElseThrow();
-        assertTrue(restored.getActive(), "Specialization should be active after restore in DB");
+        assertFalse(specializationRepository.findById(id).isPresent(), "Specialization should be deleted from DB");
     }
 
     @Test

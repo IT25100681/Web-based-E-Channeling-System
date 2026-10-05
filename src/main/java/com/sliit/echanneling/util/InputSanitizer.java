@@ -1,4 +1,4 @@
-package com.sliit.echanneling.features.hospitalmanagement.util;
+package com.sliit.echanneling.util;
 
 import org.springframework.stereotype.Component;
 

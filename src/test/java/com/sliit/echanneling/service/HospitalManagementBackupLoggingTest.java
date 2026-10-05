@@ -1,13 +1,13 @@
-package com.sliit.echanneling.features.hospitalmanagement;
+package com.sliit.echanneling.service;
 
-import com.sliit.echanneling.features.hospitalmanagement.controller.SystemOperationsApiController;
-import com.sliit.echanneling.features.hospitalmanagement.model.HospitalManagementActivityLog;
-import com.sliit.echanneling.features.hospitalmanagement.repository.HospitalManagementActivityLogRepository;
-import com.sliit.echanneling.features.hospitalmanagement.service.ActivityLogFactory;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementService;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementServiceImpl;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementSettings;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalSystemBackupExportService;
+import com.sliit.echanneling.controller.SystemOperationsApiController;
+import com.sliit.echanneling.model.HospitalManagementActivityLog;
+import com.sliit.echanneling.repository.HospitalManagementActivityLogRepository;
+import com.sliit.echanneling.service.ActivityLogFactory;
+import com.sliit.echanneling.service.HospitalManagementService;
+import com.sliit.echanneling.service.HospitalManagementSettings;
+import com.sliit.echanneling.service.HospitalSystemBackupExportService;
+import com.sliit.echanneling.service.impl.HospitalManagementServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,19 +1,15 @@
-package com.sliit.echanneling.features.hospitalmanagement.service;
+package com.sliit.echanneling.service;
 
-import com.sliit.echanneling.features.hospitalmanagement.dto.SystemSettingForm;
-import com.sliit.echanneling.features.hospitalmanagement.util.InputSanitizer;
+import com.sliit.echanneling.dto.SystemSettingForm;
 import com.sliit.echanneling.model.SystemSetting;
 import com.sliit.echanneling.repository.SystemSettingRepository;
+import com.sliit.echanneling.util.InputSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Singleton Pattern: Spring creates this service as one shared bean, making it
- * the module-wide access point for system settings and backup/recovery flags.
- */
 @Service
 @RequiredArgsConstructor
 public class HospitalManagementSettings {

@@ -1,6 +1,6 @@
-package com.sliit.echanneling.features.hospitalmanagement.repository;
+package com.sliit.echanneling.repository;
 
-import com.sliit.echanneling.features.hospitalmanagement.model.HospitalManagementActivityLog;
+import com.sliit.echanneling.model.HospitalManagementActivityLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

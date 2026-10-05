@@ -6,7 +6,6 @@
     <title>Hospital Management</title>
     <style>
         .hm-toolbar { gap: .5rem; }
-        .hm-status { min-width: 74px; }
         .hm-skeleton { display: none; height: 10px; border-radius: 4px; background: linear-gradient(90deg,#e9ecef,#f8f9fa,#e9ecef); background-size: 200% 100%; animation: hmPulse 1s linear infinite; }
         .hm-loading .hm-skeleton { display: block; }
         @keyframes hmPulse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
@@ -98,10 +97,6 @@
                                     <div class="invalid-feedback d-block" th:errors="*{postalCode}"></div>
                                 </div>
                             </div>
-                            <div class="form-check form-switch my-3">
-                                <input th:field="*{active}" class="form-check-input" type="checkbox">
-                                <label class="form-check-label">Active</label>
-                            </div>
                             <button type="submit" class="btn btn-primary w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Hospital</button>
                         </form>
                     </div>
@@ -110,19 +105,17 @@
                     <div class="card p-3 shadow-sm">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Contact</th><th>City</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Contact</th><th>City</th><th class="text-end">Actions</th></tr></thead>
                                 <tbody>
-                                <tr th:if="${#lists.isEmpty(hospitals)}"><td colspan="6" class="text-center text-muted py-4">No hospitals found.</td></tr>
+                                <tr th:if="${#lists.isEmpty(hospitals)}"><td colspan="5" class="text-center text-muted py-4">No hospitals found.</td></tr>
                                 <tr th:each="h : ${hospitals}">
                                     <td class="fw-semibold" th:text="${h.code ?: 'N/A'}">CODE</td>
                                     <td th:text="${h.name}">Name</td>
                                     <td th:text="${h.contactNo ?: 'N/A'}">Contact</td>
                                     <td th:text="${h.address != null ? h.address.city : 'N/A'}">City</td>
-                                    <td><span class="badge hm-status" th:classappend="${h.active} ? ' bg-success' : ' bg-secondary'" th:text="${h.active} ? 'Active' : 'Inactive'">Active</span></td>
                                     <td class="text-end">
                                         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editHospital' + h.hospitalId}"><i class="fa-solid fa-pen"></i></button>
-                                        <form th:if="${h.active}" th:action="@{/admin/hospital-management/hospitals/{id}/deactivate(id=${h.hospitalId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
-                                        <form th:unless="${h.active}" th:action="@{/admin/hospital-management/hospitals/{id}/restore(id=${h.hospitalId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                        <form th:action="@{/admin/hospital-management/hospitals/{id}/delete(id=${h.hospitalId})}" method="post" class="d-inline hm-write-form" onsubmit="return confirm('Delete this hospital?');"><button class="btn btn-outline-danger btn-sm" type="submit"><i class="fa-solid fa-trash"></i></button></form>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -162,10 +155,6 @@
                                 <textarea th:field="*{description}" class="form-control" th:errorclass="is-invalid" rows="3" maxlength="500"></textarea>
                                 <div class="invalid-feedback d-block" th:errors="*{description}"></div>
                             </div>
-                            <div class="form-check form-switch my-3">
-                                <input th:field="*{active}" class="form-check-input" type="checkbox">
-                                <label class="form-check-label">Active</label>
-                            </div>
                             <button type="submit" class="btn btn-success w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Department</button>
                         </form>
                     </div>
@@ -174,18 +163,16 @@
                     <div class="card p-3 shadow-sm">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Hospital</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Hospital</th><th class="text-end">Actions</th></tr></thead>
                                 <tbody>
-                                <tr th:if="${#lists.isEmpty(departments)}"><td colspan="5" class="text-center text-muted py-4">No departments found.</td></tr>
+                                <tr th:if="${#lists.isEmpty(departments)}"><td colspan="4" class="text-center text-muted py-4">No departments found.</td></tr>
                                 <tr th:each="d : ${departments}">
                                     <td class="fw-semibold" th:text="${d.code ?: 'N/A'}">CODE</td>
                                     <td th:text="${d.name}">Name</td>
                                     <td th:text="${d.hospital != null ? d.hospital.name : 'N/A'}">Hospital</td>
-                                    <td><span class="badge hm-status" th:classappend="${d.active} ? ' bg-success' : ' bg-secondary'" th:text="${d.active} ? 'Active' : 'Inactive'">Active</span></td>
                                     <td class="text-end">
                                         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editDepartment' + d.departmentId}"><i class="fa-solid fa-pen"></i></button>
-                                        <form th:if="${d.active}" th:action="@{/admin/hospital-management/departments/{id}/deactivate(id=${d.departmentId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
-                                        <form th:unless="${d.active}" th:action="@{/admin/hospital-management/departments/{id}/restore(id=${d.departmentId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                        <form th:action="@{/admin/hospital-management/departments/{id}/delete(id=${d.departmentId})}" method="post" class="d-inline hm-write-form" onsubmit="return confirm('Delete this department?');"><button class="btn btn-outline-danger btn-sm" type="submit"><i class="fa-solid fa-trash"></i></button></form>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -217,10 +204,6 @@
                                 <textarea th:field="*{description}" class="form-control" th:errorclass="is-invalid" rows="3" maxlength="500"></textarea>
                                 <div class="invalid-feedback d-block" th:errors="*{description}"></div>
                             </div>
-                            <div class="form-check form-switch my-3">
-                                <input th:field="*{active}" class="form-check-input" type="checkbox">
-                                <label class="form-check-label">Active</label>
-                            </div>
                             <button type="submit" class="btn btn-info text-white w-100 btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i> Save Specialization</button>
                         </form>
                     </div>
@@ -229,18 +212,16 @@
                     <div class="card p-3 shadow-sm">
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Description</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                                <thead class="table-light"><tr><th>Code</th><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
                                 <tbody>
-                                <tr th:if="${#lists.isEmpty(specializations)}"><td colspan="5" class="text-center text-muted py-4">No specializations found.</td></tr>
+                                <tr th:if="${#lists.isEmpty(specializations)}"><td colspan="4" class="text-center text-muted py-4">No specializations found.</td></tr>
                                 <tr th:each="s : ${specializations}">
                                     <td class="fw-semibold" th:text="${s.code ?: 'N/A'}">CODE</td>
                                     <td th:text="${s.name}">Name</td>
                                     <td th:text="${s.description ?: 'N/A'}">Description</td>
-                                    <td><span class="badge hm-status" th:classappend="${s.active} ? ' bg-success' : ' bg-secondary'" th:text="${s.active} ? 'Active' : 'Inactive'">Active</span></td>
                                     <td class="text-end">
                                         <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:attr="data-bs-target=${'#editSpecialization' + s.specializationId}"><i class="fa-solid fa-pen"></i></button>
-                                        <form th:if="${s.active}" th:action="@{/admin/hospital-management/specializations/{id}/deactivate(id=${s.specializationId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-ban"></i></button></form>
-                                        <form th:unless="${s.active}" th:action="@{/admin/hospital-management/specializations/{id}/restore(id=${s.specializationId})}" method="post" class="d-inline hm-write-form"><button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-rotate-left"></i></button></form>
+                                        <form th:action="@{/admin/hospital-management/specializations/{id}/delete(id=${s.specializationId})}" method="post" class="d-inline hm-write-form" onsubmit="return confirm('Delete this specialization?');"><button class="btn btn-outline-danger btn-sm" type="submit"><i class="fa-solid fa-trash"></i></button></form>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -365,7 +346,6 @@
                     <div class="col-md-4"><label class="form-label">Street</label><input name="street" th:value="${h.address != null ? h.address.street : ''}" class="form-control"></div>
                     <div class="col-md-2"><label class="form-label">City</label><input name="city" th:value="${h.address != null ? h.address.city : ''}" class="form-control"></div>
                     <div class="col-md-2"><label class="form-label">Postal</label><input name="postalCode" th:value="${h.address != null ? h.address.postalCode : ''}" class="form-control"></div>
-                    <div class="col-12"><input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${h.active}"><label class="form-check-label">Active</label></div></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
             </form>
@@ -381,7 +361,6 @@
                     <label class="form-label">Name</label><input name="name" th:value="${d.name}" class="form-control mb-2" required maxlength="255">
                     <label class="form-label">Hospital</label><select name="hospitalId" class="form-select mb-2" required><option th:each="h : ${hospitals}" th:value="${h.hospitalId}" th:selected="${d.hospital != null and d.hospital.hospitalId == h.hospitalId}" th:text="${h.name}">Hospital</option></select>
                     <label class="form-label">Description</label><textarea name="description" class="form-control mb-2" rows="3" maxlength="500" th:text="${d.description}"></textarea>
-                    <input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${d.active}"><label class="form-check-label">Active</label></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
             </form>
@@ -396,7 +375,6 @@
                     <label class="form-label">Code</label><input name="code" th:value="${s.code}" class="form-control mb-2" required maxlength="50" pattern="[A-Za-z0-9_-]+">
                     <label class="form-label">Name</label><input name="name" th:value="${s.name}" class="form-control mb-2" required maxlength="255">
                     <label class="form-label">Description</label><textarea name="description" class="form-control mb-2" rows="3" maxlength="500" th:text="${s.description}"></textarea>
-                    <input type="hidden" name="active" value="false"><div class="form-check form-switch"><input name="active" value="true" class="form-check-input" type="checkbox" th:checked="${s.active}"><label class="form-check-label">Active</label></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary">Update</button></div>
             </form>
