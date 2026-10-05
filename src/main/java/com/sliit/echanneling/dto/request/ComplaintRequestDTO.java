@@ -6,6 +6,8 @@ import lombok.Data;
 
 @Data
 public class ComplaintRequestDTO {
+    private Long complaintId;
+
     @NotNull(message = "Patient ID is required")
     private Long patientId;
 

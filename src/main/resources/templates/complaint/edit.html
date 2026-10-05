@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Edit Complaint</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card p-4 shadow">
+                <h3 class="fw-bold text-primary mb-3"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Patient Complaint</h3>
+                <p class="text-muted">Update your complaint details below.</p>
+                <form th:action="@{/complaints/{id}(id=${complaintId})}" th:object="${complaintForm}" method="post">
+                    <input type="hidden" th:field="*{patientId}">
+                    <input type="hidden" th:field="*{complaintId}">
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Complaint Category *</label>
+                        <select th:field="*{categoryId}" class="form-select" required>
+                            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}">Category</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-weight-bold">Subject / Title *</label>
+                        <input type="text" th:field="*{title}" class="form-control" required placeholder="Brief summary of your complaint">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label font-weight-bold">Detailed Description *</label>
+                        <textarea th:field="*{description}" class="form-control" rows="4" required placeholder="Describe the incident, appointment details, or issues experienced..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1 py-2 fw-bold"><i class="fa-solid fa-floppy-disk me-1"></i> Update Complaint</button>
+                        <a href="/complaints" class="btn btn-secondary py-2 fw-bold">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

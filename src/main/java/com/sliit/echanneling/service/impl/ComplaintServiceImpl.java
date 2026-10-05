@@ -83,4 +83,45 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         return complaintRepository.save(complaint);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Complaint getComplaintById(Long complaintId) {
+        return complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new IllegalArgumentException("Complaint not found: " + complaintId));
+    }
+
+    @Override
+    @Transactional
+    public Complaint updateComplaint(Long complaintId, ComplaintRequestDTO request, Long patientId) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new IllegalArgumentException("Complaint not found: " + complaintId));
+
+        if (patientId == null || complaint.getPatient() == null || !complaint.getPatient().getPatientId().equals(patientId)) {
+            throw new IllegalArgumentException("You are only allowed to update your own complaints.");
+        }
+
+        ComplaintCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + request.getCategoryId()));
+
+        complaint.setCategory(category);
+        complaint.setTitle(request.getTitle());
+        complaint.setDescription(request.getDescription());
+        complaint.setUpdatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+
+        return complaintRepository.save(complaint);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComplaint(Long complaintId, Long patientId) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new IllegalArgumentException("Complaint not found: " + complaintId));
+
+        if (patientId == null || complaint.getPatient() == null || !complaint.getPatient().getPatientId().equals(patientId)) {
+            throw new IllegalArgumentException("You are only allowed to delete your own complaints.");
+        }
+
+        complaintRepository.delete(complaint);
+    }
 }

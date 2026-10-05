@@ -13,4 +13,7 @@ public interface ComplaintService {
     List<Complaint> getAllComplaints();
     List<ComplaintCategory> getAllCategories();
     Complaint updateComplaintStatus(Long complaintId, ComplaintStatus status, Long staffId, String resolutionNotes);
+    Complaint getComplaintById(Long complaintId);
+    Complaint updateComplaint(Long complaintId, ComplaintRequestDTO request, Long patientId);
+    void deleteComplaint(Long complaintId, Long patientId);
 }
