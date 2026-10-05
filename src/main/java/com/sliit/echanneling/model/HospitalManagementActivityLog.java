@@ -1,4 +1,4 @@
-package com.sliit.echanneling.features.hospitalmanagement.model;
+package com.sliit.echanneling.model;
 
 import jakarta.persistence.*;
 import lombok.*;

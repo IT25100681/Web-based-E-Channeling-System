@@ -1,4 +1,4 @@
-package com.sliit.echanneling.features.hospitalmanagement.repository;
+package com.sliit.echanneling.repository;
 
 import com.sliit.echanneling.model.Hospital;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,10 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-/**
- * Repository Pattern: this interface hides persistence details for Hospital records
- * from the controller and service layers.
- */
 public interface HospitalManagementHospitalRepository extends JpaRepository<Hospital, Long> {
     List<Hospital> findAllByOrderByNameAsc();
     List<Hospital> findByActiveTrueOrderByNameAsc();

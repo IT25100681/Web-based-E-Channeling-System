@@ -1,4 +1,4 @@
-package com.sliit.echanneling.features.hospitalmanagement.repository;
+package com.sliit.echanneling.repository;
 
 import com.sliit.echanneling.model.Specialization;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,10 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-/**
- * Repository Pattern: this interface abstracts Specialization database access
- * behind a narrow module-specific contract.
- */
 public interface HospitalManagementSpecializationRepository extends JpaRepository<Specialization, Long> {
     List<Specialization> findAllByOrderByNameAsc();
     boolean existsByNameIgnoreCase(String name);

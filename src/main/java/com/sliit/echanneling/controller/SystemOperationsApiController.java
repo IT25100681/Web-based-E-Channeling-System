@@ -1,7 +1,7 @@
-package com.sliit.echanneling.features.hospitalmanagement.controller;
+package com.sliit.echanneling.controller;
 
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalManagementService;
-import com.sliit.echanneling.features.hospitalmanagement.service.HospitalSystemBackupExportService;
+import com.sliit.echanneling.service.HospitalManagementService;
+import com.sliit.echanneling.service.HospitalSystemBackupExportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ContentDisposition;
@@ -35,10 +35,6 @@ public class SystemOperationsApiController {
         }
     }
 
-    /**
-     * Streams the hospital-management backup as JSON with attachment headers.
-     * The stream delegates database paging to HospitalSystemBackupExportService.
-     */
     @GetMapping("/download-backup")
     public ResponseEntity<StreamingResponseBody> downloadBackup() {
         String filename = backupExportService.backupFileName();

@@ -1,7 +1,7 @@
-package com.sliit.echanneling.features.hospitalmanagement;
+package com.sliit.echanneling.controller;
 
-import com.sliit.echanneling.features.hospitalmanagement.dto.HospitalForm;
-import com.sliit.echanneling.features.hospitalmanagement.util.InputSanitizer;
+import com.sliit.echanneling.dto.HospitalForm;
+import com.sliit.echanneling.util.InputSanitizer;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
