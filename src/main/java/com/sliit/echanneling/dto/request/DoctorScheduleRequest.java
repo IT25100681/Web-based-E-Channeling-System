@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 
 @Data
 public class DoctorScheduleRequest {
+    private Long scheduleId;
+
     @NotNull(message = "Doctor ID is required")
     private Long doctorId;
 
@@ -26,4 +28,6 @@ public class DoctorScheduleRequest {
 
     @NotNull(message = "Consultation fee is required")
     private BigDecimal consultationFee;
+
+    private String status;
 }

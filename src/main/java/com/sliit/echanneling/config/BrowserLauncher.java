@@ -50,12 +50,35 @@ public class BrowserLauncher implements ApplicationListener<ApplicationReadyEven
         }
 
         String url = "http://localhost:" + port;
-        launchEdgeBrowser(url);
+        launchBrowser(url);
     }
 
-    private void launchEdgeBrowser(String url) {
-        log.info("Opening Microsoft Edge for {}...", url);
+    private void launchBrowser(String url) {
+        log.info("Opening browser for {}...", url);
 
+        // 1. Prioritize Google Chrome
+        List<String> knownChromePaths = List.of(
+                "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                System.getenv("LOCALAPPDATA") != null ? System.getenv("LOCALAPPDATA") + "\\Google\\Chrome\\Application\\chrome.exe" : ""
+        );
+
+        for (String chromePath : knownChromePaths) {
+            if (!chromePath.isBlank()) {
+                File chromeBinary = new File(chromePath);
+                if (chromeBinary.exists()) {
+                    try {
+                        new ProcessBuilder(chromeBinary.getAbsolutePath(), url).start();
+                        log.info("Successfully opened Google Chrome: {}", chromePath);
+                        return;
+                    } catch (Exception ex) {
+                        log.warn("Failed launching Chrome via {}: {}", chromePath, ex.getMessage());
+                    }
+                }
+            }
+        }
+
+        // 2. Microsoft Edge fallback
         List<String> knownEdgePaths = List.of(
                 "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
                 "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
@@ -74,16 +97,7 @@ public class BrowserLauncher implements ApplicationListener<ApplicationReadyEven
             }
         }
 
-        // Fallback 1: Windows URL protocol for Microsoft Edge
-        try {
-            new ProcessBuilder("cmd", "/c", "start", "microsoft-edge:" + url).start();
-            log.info("Successfully opened application using microsoft-edge URI protocol handler.");
-            return;
-        } catch (Exception ex) {
-            log.warn("Failed launching via microsoft-edge URI protocol: {}", ex.getMessage());
-        }
-
-        // Fallback 2: Desktop API
+        // 3. Fallback: Java Desktop API
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             try {
                 Desktop.getDesktop().browse(new URI(url));
@@ -94,7 +108,7 @@ public class BrowserLauncher implements ApplicationListener<ApplicationReadyEven
             }
         }
 
-        // Fallback 3: Standard Windows default browser
+        // 4. Fallback: Standard Windows default browser
         try {
             new ProcessBuilder("cmd", "/c", "start", "", url).start();
             log.info("Opened application via default browser command.");

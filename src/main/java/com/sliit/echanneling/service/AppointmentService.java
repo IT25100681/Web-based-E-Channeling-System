@@ -15,6 +15,5 @@ public interface AppointmentService {
     List<AppointmentViewDTO> getAppointmentsByDoctor(Long doctorId);
     AppointmentViewDTO rescheduleAppointment(Long appointmentId, RescheduleRequestDTO request, String username);
     void cancelAppointment(Long appointmentId, String username);
-    void cancelAppointmentByDoctor(Long appointmentId, String doctorUsername);
     void completeAppointment(Long appointmentId);
 }
