@@ -54,6 +54,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<DoctorScheduleResponse> getAllSchedules() {
+        return scheduleRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<DoctorScheduleResponse> getSchedulesByDoctor(Long doctorId) {
         return scheduleRepository.findByDoctor_StaffId(doctorId).stream()
                 .map(this::mapToResponse)
@@ -76,6 +84,75 @@ public class ScheduleServiceImpl implements ScheduleService {
         DoctorSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("Schedule not found: " + scheduleId));
         return mapToResponse(schedule);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DoctorSchedule getScheduleEntityById(Long scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Schedule not found: " + scheduleId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.sliit.echanneling.model.Appointment> getAppointmentsForSchedule(Long scheduleId) {
+        return appointmentRepository.findBySchedule_ScheduleId(scheduleId);
+    }
+
+    @Override
+    @Transactional
+    public DoctorSchedule updateSchedule(Long scheduleId, DoctorScheduleRequest request) {
+        DoctorSchedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Schedule not found with ID: " + scheduleId));
+
+        if (request.getDoctorId() != null && (schedule.getDoctor() == null || !request.getDoctorId().equals(schedule.getDoctor().getStaffId()))) {
+            Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                    .orElseThrow(() -> new IllegalArgumentException("Doctor not found with ID: " + request.getDoctorId()));
+            schedule.setDoctor(doctor);
+        }
+
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId()).orElse(null);
+            schedule.setDepartment(department);
+        }
+
+        schedule.setScheduleDate(request.getScheduleDate());
+        schedule.setStartTime(request.getStartTime());
+        schedule.setEndTime(request.getEndTime());
+        schedule.setMaxPatients(request.getMaxPatients());
+        schedule.setConsultationFee(request.getConsultationFee());
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            schedule.setStatus(request.getStatus());
+        }
+
+        return scheduleRepository.save(schedule);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasBookedAppointments(Long scheduleId) {
+        return appointmentRepository.countActiveBookingsBySchedule(scheduleId) > 0;
+    }
+
+    @Override
+    @Transactional
+    public void deleteSchedule(Long scheduleId) {
+        DoctorSchedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Schedule not found with ID: " + scheduleId));
+
+        long activeBookings = appointmentRepository.countActiveBookingsBySchedule(scheduleId);
+        if (activeBookings > 0) {
+            throw new IllegalStateException("Cannot delete schedule because " + activeBookings + " active appointment(s) are booked for this session. Please cancel the session instead.");
+        }
+
+        long totalLinked = appointmentRepository.countBySchedule_ScheduleId(scheduleId);
+        if (totalLinked > 0) {
+            // Cannot remove physically due to foreign key history; mark cancelled
+            schedule.setStatus("CANCELLED");
+            scheduleRepository.save(schedule);
+        } else {
+            scheduleRepository.delete(schedule);
+        }
     }
 
     @Override

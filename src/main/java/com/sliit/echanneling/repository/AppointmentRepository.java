@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     List<Appointment> findByPatient_PatientId(Long patientId);
     List<Appointment> findByDoctor_StaffId(Long doctorId);
+    List<Appointment> findBySchedule_ScheduleId(Long scheduleId);
+    long countBySchedule_ScheduleId(Long scheduleId);
     Optional<Appointment> findByReferenceNo(String referenceNo);
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.schedule.scheduleId = :scheduleId AND a.status IN ('PENDING', 'CONFIRMED')")
@@ -21,7 +23,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTime(Long doctorId, String appointmentDate, String appointmentTime);
     boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNot(Long doctorId, String appointmentDate, String appointmentTime, Long appointmentId);
-
-    boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndStatusNot(Long doctorId, String appointmentDate, String appointmentTime, AppointmentStatus status);
-    boolean existsByDoctor_StaffIdAndAppointmentDateAndAppointmentTimeAndAppointmentIdNotAndStatusNot(Long doctorId, String appointmentDate, String appointmentTime, Long appointmentId, AppointmentStatus status);
 }
