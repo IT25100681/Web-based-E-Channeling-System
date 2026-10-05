@@ -123,5 +123,6 @@ public class ComplaintServiceImpl implements ComplaintService {
         }
 
         complaintRepository.delete(complaint);
+        complaintRepository.flush();
     }
 }

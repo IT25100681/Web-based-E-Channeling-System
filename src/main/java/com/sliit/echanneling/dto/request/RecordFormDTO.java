@@ -6,10 +6,11 @@ import lombok.Data;
 
 @Data
 public class RecordFormDTO {
+    private Long recordId;
+
     @NotNull(message = "Patient ID is required")
     private Long patientId;
 
-    @NotNull(message = "Doctor ID is required")
     private Long doctorId;
 
     @NotBlank(message = "Diagnosis is required")
